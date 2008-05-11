@@ -1,0 +1,7 @@
+zebu: ZFS Backup Utilities
+
+This little project contains a set of backup utilities designed to work with
+ZFS's unique abilities (particularly snapshotting, and send/receive).  It
+will be completely useless if you don't have ZFS.
+
+More info later, as I get to that point.

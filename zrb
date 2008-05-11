@@ -2,3 +2,13 @@
 #
 # zrb is an rsync-based backup utility.  It syncs down a copy of a system to
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
+
+
+import sys, getopt;
+
+
+def main():
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()

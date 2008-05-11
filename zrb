@@ -7,8 +7,28 @@
 import sys, getopt;
 
 
+def usage():
+    print "zrb [options]"
+    print
+    print "-h, --help	Print a usage summary"
+
+
 def main():
+    # Collect command-line args
+    try:
+	opts, otherargs = getopt.getopt( sys.argv[1:], "h", ["help"] )
+    except getopt.GetoptError:
+	print "Invalid option found."
+	usage()
+	sys.exit(1)
+
+    # Parse command-line args
+    for o, a in opts:
+	if o in ("-h", "--help"):
+	    usage()
+	    sys.exit(0)
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

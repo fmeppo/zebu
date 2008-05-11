@@ -1,0 +1,4 @@
+#!/usr/local/bin/python
+#
+# zrb is an rsync-based backup utility.  It syncs down a copy of a system to
+# a ZFS filesystem, then triggers a ZFS snapshot when done.

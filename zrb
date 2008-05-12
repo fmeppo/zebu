@@ -4,19 +4,58 @@
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
 
 
-import sys, getopt;
+import os, sys, getopt
+from stat import *
+
+
+class ZRBError:
+    def __init__(self, str=None):
+	if str != None:
+	    self.string = str
+	else:
+	    self.string = "Unknown ZRB error"
+
+    def __str__(self):
+	return self.string
+
+
+def loadConfig(file=None):
+    if file == None:
+	default_files = ["/etc/zrb.conf", "/usr/local/etc/zrb.conf"]
+	for default in default_files:
+	    try:
+		m = os.stat(default)
+		if S_ISREG(m):
+		    file = default
+		    break
+	    except OSError:
+		pass
+
+    if file == None:
+	raise ZRBError("No config file found.")
+
+    config = ConfigParser.ConfigParser()
+    try:
+	list = config.read([file])
+    except:
+	raise ZRBError("Error reading config file " + file)
+    return config, list
 
 
 def usage():
     print "zrb [options]"
     print
-    print "-h, --help	Print a usage summary"
+    print "-h, --help		Print a usage summary"
+    print "-f, --config <file>	Use config file at <file>"
 
 
 def main():
+    # Defaults
+    ConfigFile = None
+
     # Collect command-line args
     try:
-	opts, otherargs = getopt.getopt( sys.argv[1:], "h", ["help"] )
+	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:", ["help","config="] )
     except getopt.GetoptError:
 	print "Invalid option found."
 	usage()
@@ -27,7 +66,15 @@ def main():
 	if o in ("-h", "--help"):
 	    usage()
 	    sys.exit(0)
-    sys.exit(0)
+	elif o in ("-f", "--config"):
+	    ConfigFile = a
+
+    # Load the configuration
+    try:
+	config, files = loadConfig(ConfigFile)
+    except ZRBError, e:
+	print e
+	sys.exit(2)
 
 
 if __name__ == "__main__":

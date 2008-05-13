@@ -46,6 +46,9 @@ class ZRBConfig:
 
 	# hardcoded defaults
 
+    def __str__(self):
+	return self.filename
+
     def getVolumes(self):
 	return self.config.sections()
 
@@ -97,6 +100,8 @@ def main():
     except ZRBError, e:
 	print e
 	sys.exit(2)
+
+    print str(config)
 
 
 if __name__ == "__main__":

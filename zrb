@@ -4,7 +4,7 @@
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
 
 
-import os, sys, getopt
+import os, sys, getopt, ConfigParser
 from stat import *
 
 
@@ -25,7 +25,7 @@ class ZRBConfig:
 	    default_files = ["/etc/zrb.conf", "/usr/local/etc/zrb.conf"]
 	    for default in default_files:
 		try:
-		    m = os.stat(default)
+		    m = os.stat(default)[ST_MODE]
 		    if S_ISREG(m):
 			file = default
 			break
@@ -43,6 +43,22 @@ class ZRBConfig:
 
 	self.config = config	# ConfigParser object
 	self.filename = list[0]	# config file name
+
+	# hardcoded defaults
+
+    def getVolumes(self):
+	return self.config.sections()
+
+    # Allow volume-specific options to override defaults, and declared defaults
+    # to override hard-coded defaults.
+    def getOption(self, volume, option):
+	if self.config.has_option(volume, option):
+	    return self.config.get(volume, option)
+	else:
+	    if self.config.has_option("DEFAULTS", option):
+		return self.config.get("DEFAULTS", option)
+	    else:
+		return self.defaults[option]
 
 
 def usage():

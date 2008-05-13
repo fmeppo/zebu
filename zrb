@@ -19,27 +19,30 @@ class ZRBError:
 	return self.string
 
 
-def loadConfig(file=None):
-    if file == None:
-	default_files = ["/etc/zrb.conf", "/usr/local/etc/zrb.conf"]
-	for default in default_files:
-	    try:
-		m = os.stat(default)
-		if S_ISREG(m):
-		    file = default
-		    break
-	    except OSError:
-		pass
+class ZRBConfig:
+    def __init__(self, file=None):
+	if file == None:
+	    default_files = ["/etc/zrb.conf", "/usr/local/etc/zrb.conf"]
+	    for default in default_files:
+		try:
+		    m = os.stat(default)
+		    if S_ISREG(m):
+			file = default
+			break
+		except OSError:
+		    pass
 
-    if file == None:
-	raise ZRBError("No config file found.")
+	if file == None:
+	    raise ZRBError("No config file found.")
 
-    config = ConfigParser.ConfigParser()
-    try:
-	list = config.read([file])
-    except:
-	raise ZRBError("Error reading config file " + file)
-    return config, list
+	config = ConfigParser.ConfigParser()
+	try:
+	    list = config.read([file])
+	except:
+	    raise ZRBError("Error reading config file " + file)
+
+	self.config = config	# ConfigParser object
+	self.filename = list[0]	# config file name
 
 
 def usage():
@@ -52,10 +55,11 @@ def usage():
 def main():
     # Defaults
     ConfigFile = None
+    InitMode = False
 
     # Collect command-line args
     try:
-	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:", ["help","config="] )
+	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:i", ["help","config=","init"] )
     except getopt.GetoptError:
 	print "Invalid option found."
 	usage()
@@ -68,10 +72,12 @@ def main():
 	    sys.exit(0)
 	elif o in ("-f", "--config"):
 	    ConfigFile = a
+	elif o in ("-i", "--init"):
+	    InitMode = True
 
     # Load the configuration
     try:
-	config, files = loadConfig(ConfigFile)
+	config = ZRBConfig(ConfigFile)
     except ZRBError, e:
 	print e
 	sys.exit(2)

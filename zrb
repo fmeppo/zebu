@@ -45,11 +45,12 @@ class ZRBConfig:
 	self.filename = list[0]	# config file name
 
 	# hardcoded defaults
+	self.defaults = []
 
     def __str__(self):
 	return self.filename
 
-    def getVolumes(self):
+    def getVaults(self):
 	return self.config.sections()
 
     # Allow volume-specific options to override defaults, and declared defaults
@@ -63,6 +64,12 @@ class ZRBConfig:
 	    else:
 		return self.defaults[option]
 
+    def hasVault(self, vault):
+	if vault in self.getVaults():
+	    return True
+	else:
+	    return False
+
 
 def usage():
     print "zrb [options]"
@@ -75,10 +82,11 @@ def main():
     # Defaults
     ConfigFile = None
     InitMode = False
+    SingleShotVault = None
 
     # Collect command-line args
     try:
-	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:i", ["help","config=","init"] )
+	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:", ["help","config=","init","vault="] )
     except getopt.GetoptError:
 	print "Invalid option found."
 	usage()
@@ -93,6 +101,8 @@ def main():
 	    ConfigFile = a
 	elif o in ("-i", "--init"):
 	    InitMode = True
+	elif o in ("-V", "--vault"):
+	    SingleShotVault = a
 
     # Load the configuration
     try:
@@ -102,6 +112,15 @@ def main():
 	sys.exit(2)
 
     print str(config)
+
+    if SingleShotVault != None:
+	vaults = [SingleShotVault]
+    else:
+	vaults = config.getVaults()
+
+    for vault in vaults:
+	if not config.hasVault(vault):
+	    print "Vault " + vault + " does not exist in " + str(config) + ", skipping."
 
 
 if __name__ == "__main__":

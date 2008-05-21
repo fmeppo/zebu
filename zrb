@@ -50,7 +50,7 @@ class ZRBConfig:
     def __str__(self):
 	return self.filename
 
-    def getVaults(self):
+    def getVaultNames(self):
 	return self.config.sections()
 
     # Allow volume-specific options to override defaults, and declared defaults
@@ -65,10 +65,22 @@ class ZRBConfig:
 		return self.defaults[option]
 
     def hasVault(self, vault):
-	if vault in self.getVaults():
+	if vault in self.getVaultNames():
 	    return True
 	else:
 	    return False
+
+    def getVault(self, name):
+	if name in self.getVaultNames():
+	    return ZRBVault(name, self)
+	else:
+	    raise ZRBError("Vault " + name + " does not exist in " + str(self))
+
+
+class ZRBVault:
+    def __init__(self, name, config):
+	self.name = name
+	self.config = config
 
 
 def usage():
@@ -116,11 +128,14 @@ def main():
     if SingleShotVault != None:
 	vaults = [SingleShotVault]
     else:
-	vaults = config.getVaults()
+	vaults = config.getVaultNames()
 
-    for vault in vaults:
-	if not config.hasVault(vault):
-	    print "Vault " + vault + " does not exist in " + str(config) + ", skipping."
+    for vname in vaults:
+	try:
+	    vault = config.getVault(vname)
+	except ZRBError, e:
+	    print str(e)
+	    continue
 
 
 if __name__ == "__main__":

@@ -82,6 +82,12 @@ class ZRBVault:
 	self.name = name
 	self.config = config
 
+    def backup(self):
+	self.verify()
+
+    def verify(self):
+	pass
+
 
 def usage():
     print "zrb [options]"
@@ -136,6 +142,10 @@ def main():
 	except ZRBError, e:
 	    print str(e)
 	    continue
+	try:
+	    vault.backup()
+	except ZRBError, e:
+	    print str(e)
 
 
 if __name__ == "__main__":

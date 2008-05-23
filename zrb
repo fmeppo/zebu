@@ -100,6 +100,7 @@ class ZRBVault:
 	self.name = name
 	self.config = config
 	self.path = config.getVaultPath(name)
+	self.rsync_log = self.path + "/rsync_log"
 	self.logger = ZRBErrorLogger(self.path + "/errors")
 
     def backup(self):

@@ -19,6 +19,12 @@ class ZRBError:
 	return self.string
 
 
+class ZRBErrorLogger:
+    def __init__(self, logpath):
+	self.log = []
+	self.logpath = logpath
+
+
 class ZRBConfig:
     def __init__(self, file=None):
 	if file == None:
@@ -62,7 +68,10 @@ class ZRBConfig:
 	    if self.config.has_option("DEFAULTS", option):
 		return self.config.get("DEFAULTS", option)
 	    else:
-		return self.defaults[option]
+		try:
+		    return self.defaults[option]
+		except e:
+		    raise ZRBError("Required option \"" + option + "\" not set.")
 
     def hasVault(self, vault):
 	if vault in self.getVaultNames():
@@ -76,11 +85,22 @@ class ZRBConfig:
 	else:
 	    raise ZRBError("Vault " + name + " does not exist in " + str(self))
 
+    def getVaultPath(self, vault):
+	if self.config.has_option(vault, "repopath"):
+	    return self.config.get(vault, "repopath")
+	else:
+	    if self.config.has_option("DEFAULTS", "repopath"):
+		return self.config.get("DEFAULTS", "repopath") + "/" + str(vault)
+	    else:
+		raise ZRBError("Required repository path (\"repopath\") not defined.")
+
 
 class ZRBVault:
     def __init__(self, name, config):
 	self.name = name
 	self.config = config
+	self.path = config.getVaultPath(name)
+	self.logger = ZRBErrorLogger(self.path + "/errors")
 
     def backup(self):
 	self.verify()
@@ -94,6 +114,7 @@ def usage():
     print
     print "-h, --help		Print a usage summary"
     print "-f, --config <file>	Use config file at <file>"
+    print "-v, --verbose	Be rather verbose"
 
 
 def main():
@@ -101,10 +122,11 @@ def main():
     ConfigFile = None
     InitMode = False
     SingleShotVault = None
+    Verbose = False
 
     # Collect command-line args
     try:
-	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:", ["help","config=","init","vault="] )
+	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:v", ["help","config=","init","vault=","verbose"] )
     except getopt.GetoptError:
 	print "Invalid option found."
 	usage()
@@ -121,6 +143,8 @@ def main():
 	    InitMode = True
 	elif o in ("-V", "--vault"):
 	    SingleShotVault = a
+	elif o in ("-v", "--verbose"):
+	    Verbose = True
 
     # Load the configuration
     try:
@@ -129,7 +153,8 @@ def main():
 	print e
 	sys.exit(2)
 
-    print str(config)
+    if Verbose:
+	print "Found config: " + str(config)
 
     if SingleShotVault != None:
 	vaults = [SingleShotVault]
@@ -137,6 +162,8 @@ def main():
 	vaults = config.getVaultNames()
 
     for vname in vaults:
+	if Verbose:
+	    print "Dumping vault: " + vname
 	try:
 	    vault = config.getVault(vname)
 	except ZRBError, e:

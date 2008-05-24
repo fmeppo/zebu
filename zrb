@@ -132,12 +132,12 @@ class ZRBVault:
 	# check tree ISDIR (create, warn)
 	try:
 	    m = os.stat(self.tree_path)[ST_MODE]
-	except e:
+	except OSError, e:
 	    # create dir
 	    try:
 		os.mkdir(self.tree_path, 0755)
 		self.logger.logWarning("Created tree directory.")
-	    except e:
+	    except OSError:
 		raise ZRBError("Tree could not be created for vault " + self.name)
 
 	# Test exclusion file(s)

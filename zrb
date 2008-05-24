@@ -74,8 +74,8 @@ class ZRBConfig:
 	if self.config.has_option(volume, option):
 	    return self.config.get(volume, option)
 	else:
-	    if self.config.has_option("DEFAULTS", option):
-		return self.config.get("DEFAULTS", option)
+	    if self.config.has_option("DEFAULT", option):
+		return self.config.get("DEFAULT", option)
 	    else:
 		try:
 		    return self.defaults[option]
@@ -98,8 +98,8 @@ class ZRBConfig:
 	if self.config.has_option(vault, "repopath"):
 	    return self.config.get(vault, "repopath")
 	else:
-	    if self.config.has_option("DEFAULTS", "repopath"):
-		return self.config.get("DEFAULTS", "repopath") + "/" + str(vault)
+	    if self.config.has_option("DEFAULT", "repopath"):
+		return self.config.get("DEFAULT", "repopath") + "/" + str(vault)
 	    else:
 		raise ZRBError("Required repository path (\"repopath\") not defined.")
 
@@ -124,7 +124,7 @@ class ZRBVault:
 	# check repopath ISDIR
 	try:
 	    m = os.stat(self.path)[ST_MODE]
-	except e:
+	except OSError, e:
 	    raise ZRBError("Repository not found: " + self.path)
 	if not S_ISDIR(m):
 	    raise ZRBError("Repository path not a directory: " + self.path)

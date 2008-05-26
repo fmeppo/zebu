@@ -37,7 +37,7 @@ class ZRBErrorLogger:
 class ZRBConfig:
     def __init__(self, file=None):
 	if file == None:
-	    default_files = ["/etc/zrb.conf", "/usr/local/etc/zrb.conf"]
+	    default_files = ["/etc/zebu/zrb.conf", "/usr/local/etc/zebu/zrb.conf"]
 	    for default in default_files:
 		try:
 		    m = os.stat(default)[ST_MODE]

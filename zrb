@@ -68,19 +68,14 @@ class ZRBConfig:
     def getVaultNames(self):
 	return self.config.sections()
 
-    # Allow volume-specific options to override defaults, and declared defaults
-    # to override hard-coded defaults.
-    def getOption(self, volume, option):
-	if self.config.has_option(volume, option):
-	    return self.config.get(volume, option)
+    # Allow vault-specific options to override defaults, and declared defaults
+    # to override hard-coded defaults.  All this happens automatically in the
+    # stock ConfigParser module.
+    def getOption(self, vault, option):
+	if self.config.has_option(vault, option):
+	    return self.config.get(vault, option)
 	else:
-	    if self.config.has_option("DEFAULT", option):
-		return self.config.get("DEFAULT", option)
-	    else:
-		try:
-		    return self.defaults[option]
-		except e:
-		    raise ZRBError("Required option \"" + option + "\" not set.")
+	    raise ZRBError("Required option \"" + option + "\" not set.")
 
     def hasVault(self, vault):
 	if vault in self.getVaultNames():
@@ -95,13 +90,7 @@ class ZRBConfig:
 	    raise ZRBError("Vault " + name + " does not exist in " + str(self))
 
     def getVaultPath(self, vault):
-	if self.config.has_option(vault, "repopath"):
-	    return self.config.get(vault, "repopath")
-	else:
-	    if self.config.has_option("DEFAULT", "repopath"):
-		return self.config.get("DEFAULT", "repopath") + "/" + str(vault)
-	    else:
-		raise ZRBError("Required repository path (\"repopath\") not defined.")
+	return self.getOption(vault, "repopath")
 
 
 class ZRBVault:

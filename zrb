@@ -83,7 +83,7 @@ class ZRBConfig:
 	if self.config.has_option(vault, option):
 	    return self.config.get(vault, option)
 	else:
-	    raise ZRBError("Required option \"" + option + "\" not set.")
+	    raise ZRBValueError("Required option \"" + option + "\" not set.")
 
     def hasVault(self, vault):
 	if vault in self.getVaultNames():
@@ -97,18 +97,20 @@ class ZRBConfig:
 	else:
 	    raise ZRBError("Vault " + name + " does not exist in " + str(self))
 
-    def getVaultPath(self, vault):
-	return self.getOption(vault, "repopath")
-
 
 class ZRBVault:
     def __init__(self, name, config):
 	self.name = name
 	self.config = config
-	self.path = config.getVaultPath(name)
 	self.tree_path = self.path + "/tree"
 	self.rsync_log = self.path + "/rsync_log"
 	self.logger = ZRBErrorLogger(self.path + "/errors")
+
+    path = property(fget=lambda self: 
+			self.config.getOption(self.name, "repopath"),
+		    fset=None,
+		    fdel=None,
+		    doc="Vault base path")
 
     def backup(self):
 	self.verify()

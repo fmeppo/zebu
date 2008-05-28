@@ -109,6 +109,7 @@ class ZRBVault:
 	self.rsync_log = self.path + "/rsync_log"
 	self.exclude_path = self.path + "/excludes"
 	self.logger = ZRBErrorLogger(self.path + "/errors")
+	self.use_excludes = False
 
     path = property(fget=lambda self: 
 			self.config.getOption(self.name, "repopath"),
@@ -125,9 +126,34 @@ class ZRBVault:
 		    fset=None, fdel=None,
 		    doc="more rsync excludes")
 
+    rsync_path = property(fget=lambda self: 
+			self.config.getOption(self.name, "rsync_path"),
+		    fset=None, fdel=None,
+		    doc="more rsync excludes")
+
+    server = property(fget=lambda self: 
+			self.config.getOption(self.name, "server"),
+		    fset=None, fdel=None,
+		    doc="more rsync excludes")
+
+    basepath = property(fget=lambda self: 
+			self.config.getOption(self.name, "basepath"),
+		    fset=None, fdel=None,
+		    doc="more rsync excludes")
+
     def backup(self):
 	self.verify()
-	# rsync
+
+	# rsync, using hardcoded options.
+	rsync_cmd = self.rsync_path
+	rsync_cmd += " -vrltH --delete -pgo --stats -D --numeric-ids "
+	if self.use_excludes == True:
+	    rsync_cmd += "--exclude-from=" + self.exclude_path + " "
+	rsync_cmd += self.server + ":" + self.basepath
+	rsync_cmd += " " + self.tree_path
+
+	print rsync_cmd
+
 	# save rsync log
 	self.logger.flush()
 	# zfs snapshot
@@ -166,6 +192,7 @@ class ZRBVault:
 		    line = ex.readline()
 		myex.close()
 		ex.close()
+		self.use_excludes = True
 	    except:
 		raise ZRBError("Can't create excludes file: " + self.exclude_path)
 	if self.additional_excludes != "":
@@ -182,6 +209,7 @@ class ZRBVault:
 		    line = ex.readline()
 		myex.close()
 		ex.close()
+		self.use_excludes = True
 	    except:
 		raise ZRBError("Can't append additional excludes file: " + self.exclude_path)
 

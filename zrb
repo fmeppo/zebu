@@ -19,6 +19,14 @@ class ZRBError:
 	return self.string
 
 
+class ZRBValueError(ZRBError):
+    def __init__(self, str=None):
+	if str != None:
+	    self.string = str
+	else:
+	    self.string = "Required ZRB Value not found"
+
+
 class ZRBErrorLogger:
     def __init__(self, logpath):
 	self.log = []

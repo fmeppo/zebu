@@ -213,6 +213,20 @@ class ZRBVault:
 	    except:
 		raise ZRBError("Can't append additional excludes file: " + self.exclude_path)
 
+	# If we aren't using an excludes file, we shouldn't have one.
+	if self.use_excludes == False:
+	    m = None
+	    try:
+		m = os.stat(self.exclude_path)[ST_MODE]
+	    except OSError:
+		pass
+	    if m != None:
+		try:
+		    os.unlink(self.exclude_path)
+		    self.logger.logWarning("Removed obsolete exclude file.")
+		except:
+		    self.logger.logError("Could not remove obsolete exclude file: " + self.exclude_path)
+
 
 def usage():
     print "zrb [options]"

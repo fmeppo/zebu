@@ -58,7 +58,13 @@ class ZRBConfig:
 	if file == None:
 	    raise ZRBError("No config file found.")
 
-	config = ConfigParser.ConfigParser()
+	# hardcoded defaults
+	self.defaults = {'excludes': None,
+			 'additional_excludes': None,
+			 'rsync_path': 'rsync'
+			}
+
+	config = ConfigParser.SafeConfigParser(self.defaults)
 	try:
 	    list = config.read([file])
 	except:
@@ -66,9 +72,6 @@ class ZRBConfig:
 
 	self.config = config	# ConfigParser object
 	self.filename = list[0]	# config file name
-
-	# hardcoded defaults
-	self.defaults = []
 
     def __str__(self):
 	return self.filename
@@ -108,9 +111,18 @@ class ZRBVault:
 
     path = property(fget=lambda self: 
 			self.config.getOption(self.name, "repopath"),
-		    fset=None,
-		    fdel=None,
+		    fset=None, fdel=None,
 		    doc="Vault base path")
+
+    excludes = property(fget=lambda self: 
+			self.config.getOption(self.name, "excludes"),
+		    fset=None, fdel=None,
+		    doc="rsync excludes")
+
+    additional_excludes = property(fget=lambda self: 
+			self.config.getOption(self.name, "additional_excludes"),
+		    fset=None, fdel=None,
+		    doc="more rsync excludes")
 
     def backup(self):
 	self.verify()
@@ -140,7 +152,10 @@ class ZRBVault:
 		raise ZRBError("Tree could not be created for vault " + self.name)
 
 	# Test exclusion file(s)
-	pass
+	if self.excludes != None:
+	    pass
+	if self.additional_excludes != None:
+	    pass
 
 
 def usage():

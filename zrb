@@ -107,6 +107,7 @@ class ZRBVault:
 	self.config = config
 	self.tree_path = self.path + "/tree"
 	self.rsync_log = self.path + "/rsync_log"
+	self.exclude_path = self.path + "/excludes"
 	self.logger = ZRBErrorLogger(self.path + "/errors")
 
     path = property(fget=lambda self: 
@@ -151,11 +152,38 @@ class ZRBVault:
 	    except OSError:
 		raise ZRBError("Tree could not be created for vault " + self.name)
 
-	# Test exclusion file(s)
-	if self.excludes != None:
-	    pass
-	if self.additional_excludes != None:
-	    pass
+	# Build rsync exclusions
+	if self.excludes != "":
+	    try:
+		ex = open(self.excludes, 'r')
+	    except:
+		raise ZRBError("Couldn't open excludes file: " + self.excludes)
+	    try:
+		myex = open(self.exclude_path, 'w')
+		line = ex.readline()
+		while(line):
+		    myex.write(line)
+		    line = ex.readline()
+		myex.close()
+		ex.close()
+	    except:
+		raise ZRBError("Can't create excludes file: " + self.exclude_path)
+	if self.additional_excludes != "":
+	    print self.additional_excludes
+	    try:
+		ex = open(self.additional_excludes, 'r')
+	    except:
+		raise ZRBError("Couldn't open additional excludes file: " + self.additional_excludes)
+	    try:
+		myex = open(self.exclude_path, 'a')
+		line = ex.readline()
+		while(line):
+		    myex.write(line)
+		    line = ex.readline()
+		myex.close()
+		ex.close()
+	    except:
+		raise ZRBError("Can't append additional excludes file: " + self.exclude_path)
 
 
 def usage():

@@ -33,6 +33,10 @@ class ZRBErrorLogger:
 	self.log = []
 	self.logpath = logpath
 
+    def logSuccess(self, message):
+	tuple = (time.localtime(), "Success", message)
+	self.log.append(tuple)
+
     def logError(self, message):
 	tuple = (time.localtime(), "Error", message)
 	self.log.append(tuple)
@@ -168,14 +172,65 @@ class ZRBVault:
 	self.verify()
 
 	# rsync, using hardcoded options.
-	rsync_cmd = self.rsync_path
-	rsync_cmd += " -vrltH --delete -pgo --stats -D --numeric-ids "
+	rsync_cmd = [self.rsync_path, "-vrltH", "--delete", "-pgo",
+		     "--stats", "-D", "--numeric-ids"]
 	if self.use_excludes == True:
-	    rsync_cmd += "--exclude-from=" + self.exclude_path + " "
-	rsync_cmd += self.server + ":" + self.basepath
-	rsync_cmd += " " + self.tree_path
+	    rsync_cmd.append("--exclude-from=" + self.exclude_path)
+	rsync_cmd.append(self.server + ':' + self.basepath)
+	rsync_cmd.append(self.tree_path)
 
 	print rsync_cmd
+
+	try:
+	    fd = open(self.rsync_log, 'w')
+	except OSError, e:
+	    raise ZRBError("Could not open rsync log (aborting): " + self.rsync_log)
+
+	try:
+	    proc = Popen(rsync_cmd, stdin=None, stdout=fd, stderr=fd)
+	    ret = proc.wait()
+	except OSError, e:
+	    raise ZRBError("rsync failed, aborting backup " + self.name)
+
+	# return codes shamelessly stolen from dirvish
+	retcodes = {
+	    0 : [ 'success',     "No errors" ],
+	    1 : [ 'fatal',       "syntax or usage error" ],
+	    2 : [ 'fatal',       "protocol incompatibility" ],
+	    3 : [ 'fatal',       "errors selecting input/output files, dirs" ],
+	    4 : [ 'fatal',       "requested action not supported" ],
+	    5 : [ 'fatal',       "error starting client-server protocol" ],
+
+	    10 : [ 'error',       "error in socket IO" ],
+	    11 : [ 'error',       "error in file IO" ],
+	    12 : [ 'check',       "error in rsync protocol data stream" ],
+	    13 : [ 'check',       "errors with program diagnostics" ],
+	    14 : [ 'error',       "error in IPC code" ],
+
+	    20 : [ 'error',       "status returned when sent SIGUSR1, SIGINT" ],
+	    21 : [ 'error',       "some error returned by waitpid()" ],
+	    22 : [ 'error',       "error allocating core memory buffers" ],
+	    23 : [ 'error',       "partial transfer" ],
+	    24 : [ 'warning',     "file vanished on sender" ],
+
+	    30 : [ 'error',       "timeout in data send/receive" ],
+
+	    124 : [ 'fatal',       "remote shell failed" ],
+	    125 : [ 'error',       "remote shell killed" ],
+	    126 : [ 'fatal',       "command could not be run" ],
+	    127 : [ 'fatal',       "command not found" ]
+	}
+
+	try:
+	    type = retcodes[ret][0]
+	    if type == 'error' or type == 'fatal':
+		self.logger.logError(retcodes[ret][1])
+	    if type == 'check' or type == 'warning':
+		self.logger.logWarning(retcodes[ret][1])
+	    if type == 'success':
+		self.logger.logSuccess(retcodes[ret][1])
+	except KeyError:
+	    self.logger.logWarning("Unknown rsync return code: " + str(ret))
 
 	# save rsync log
 	self.logger.flush()

@@ -179,8 +179,6 @@ class ZRBVault:
 	rsync_cmd.append(self.server + ':' + self.basepath)
 	rsync_cmd.append(self.tree_path)
 
-	print rsync_cmd
-
 	try:
 	    fd = open(self.rsync_log, 'w')
 	except OSError, e:
@@ -274,7 +272,6 @@ class ZRBVault:
 	    except:
 		raise ZRBError("Can't create excludes file: " + self.exclude_path)
 	if self.additional_excludes != "":
-	    print self.additional_excludes
 	    try:
 		ex = open(self.additional_excludes, 'r')
 	    except:

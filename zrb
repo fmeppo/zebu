@@ -4,8 +4,9 @@
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
 
 
-import os, sys, getopt, ConfigParser
+import os, sys, getopt, ConfigParser, time
 from stat import *
+from subprocess import Popen
 
 
 class ZRBError:
@@ -33,13 +34,35 @@ class ZRBErrorLogger:
 	self.logpath = logpath
 
     def logError(self, message):
-	pass
+	tuple = (time.localtime(), "Error", message)
+	self.log.append(tuple)
 
     def logWarning(self, message):
-	pass
+	tuple = (time.localtime(), "Warning", message)
+	self.log.append(tuple)
 
     def flush(self):
-	pass
+	if len(self.log) != 0:
+	    try:
+		fd = open(self.logpath, 'w')
+		for tuple in self.log:
+		    fd.write(time.strftime("%d %b %Y %H:%M:%S ", tuple[0]) +
+			     tuple[1] + " " +
+			     tuple[2])
+		fd.close()
+	    except:
+		raise ZRBError("Could not write log to " + self.logpath)
+	else:
+	    m = None
+	    try:
+		m = os.stat(self.logpath)[ST_MODE]
+	    except OSError:
+		pass
+	    if m != None:
+		try:
+		    os.unlink(self.logpath)
+		except:
+		    raise ZRBError("Could not remove obsolete log file: " + self.logpath)
 
 
 class ZRBConfig:

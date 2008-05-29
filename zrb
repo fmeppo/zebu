@@ -135,7 +135,7 @@ class ZRBVault:
 	self.tree_path = self.path + "/tree"
 	self.rsync_log = self.path + "/rsync_log"
 	self.exclude_path = self.path + "/excludes"
-	self.logger = ZRBErrorLogger(self.path + "/errors")
+	self.logger = ZRBErrorLogger(self.path + "/zrb_log")
 	self.use_excludes = False
 
     path = property(fget=lambda self: 

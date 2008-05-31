@@ -128,11 +128,16 @@ class ZEBUConfig:
 	    raise ZEBUError("Vault " + name + " does not exist in " + str(self))
 
 
-class ZEBUVault:
+class ZFSfs:
     def __init__(self, name, config):
 	self.name = name
 	self.config = config
 	self.path = "/" + name
+
+
+class ZEBUVault(ZFSfs):
+    def __init__(self, name, config):
+	ZFSfs.__init__(self, name, config)
 	self.tree_path = self.path + "/tree"
 	self.rsync_log = self.path + "/rsync_log"
 	self.exclude_path = self.path + "/excludes"

@@ -132,16 +132,12 @@ class ZRBVault:
     def __init__(self, name, config):
 	self.name = name
 	self.config = config
+	self.path = "/" + name
 	self.tree_path = self.path + "/tree"
 	self.rsync_log = self.path + "/rsync_log"
 	self.exclude_path = self.path + "/excludes"
 	self.logger = ZRBErrorLogger(self.path + "/zrb_log")
 	self.use_excludes = False
-
-    path = property(fget=lambda self: 
-			self.config.getOption(self.name, "repopath"),
-		    fset=None, fdel=None,
-		    doc="Vault base path")
 
     excludes = property(fget=lambda self: 
 			self.config.getOption(self.name, "excludes"),
@@ -158,8 +154,8 @@ class ZRBVault:
 		    fset=None, fdel=None,
 		    doc="more rsync excludes")
 
-    server = property(fget=lambda self: 
-			self.config.getOption(self.name, "server"),
+    rsync_server = property(fget=lambda self: 
+			self.config.getOption(self.name, "rsync_server"),
 		    fset=None, fdel=None,
 		    doc="more rsync excludes")
 
@@ -176,7 +172,7 @@ class ZRBVault:
 		     "--stats", "-D", "--numeric-ids"]
 	if self.use_excludes == True:
 	    rsync_cmd.append("--exclude-from=" + self.exclude_path)
-	rsync_cmd.append(self.server + ':' + self.basepath)
+	rsync_cmd.append(self.rsync_server + ':' + self.basepath)
 	rsync_cmd.append(self.tree_path)
 
 	try:

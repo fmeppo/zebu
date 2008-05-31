@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 #
-# zrb is an rsync-based backup utility.  It syncs down a copy of a system to
+# zebu is an zfs-based backup utility.  It syncs down a copy of a system to
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
 
 
@@ -9,26 +9,26 @@ from stat import *
 from subprocess import Popen
 
 
-class ZRBError:
+class ZEBUError:
     def __init__(self, str=None):
 	if str != None:
 	    self.string = str
 	else:
-	    self.string = "Unknown ZRB error"
+	    self.string = "Unknown ZEBU error"
 
     def __str__(self):
 	return self.string
 
 
-class ZRBValueError(ZRBError):
+class ZEBUValueError(ZEBUError):
     def __init__(self, str=None):
 	if str != None:
 	    self.string = str
 	else:
-	    self.string = "Required ZRB Value not found"
+	    self.string = "Required ZEBU Value not found"
 
 
-class ZRBErrorLogger:
+class ZEBUErrorLogger:
     def __init__(self, logpath):
 	self.log = []
 	self.logpath = logpath
@@ -55,7 +55,7 @@ class ZRBErrorLogger:
 			     tuple[2])
 		fd.close()
 	    except:
-		raise ZRBError("Could not write log to " + self.logpath)
+		raise ZEBUError("Could not write log to " + self.logpath)
 	else:
 	    m = None
 	    try:
@@ -66,13 +66,13 @@ class ZRBErrorLogger:
 		try:
 		    os.unlink(self.logpath)
 		except:
-		    raise ZRBError("Could not remove obsolete log file: " + self.logpath)
+		    raise ZEBUError("Could not remove obsolete log file: " + self.logpath)
 
 
-class ZRBConfig:
+class ZEBUConfig:
     def __init__(self, file=None):
 	if file == None:
-	    default_files = ["/etc/zebu/zrb.conf", "/usr/local/etc/zebu/zrb.conf"]
+	    default_files = ["/etc/zebu/zebu.conf", "/usr/local/etc/zebu/zebu.conf"]
 	    for default in default_files:
 		try:
 		    m = os.stat(default)[ST_MODE]
@@ -83,7 +83,7 @@ class ZRBConfig:
 		    pass
 
 	if file == None:
-	    raise ZRBError("No config file found.")
+	    raise ZEBUError("No config file found.")
 
 	# hardcoded defaults
 	self.defaults = {'excludes': None,
@@ -95,7 +95,7 @@ class ZRBConfig:
 	try:
 	    list = config.read([file])
 	except:
-	    raise ZRBError("Error reading config file " + file)
+	    raise ZEBUError("Error reading config file " + file)
 
 	self.config = config	# ConfigParser object
 	self.filename = list[0]	# config file name
@@ -113,7 +113,7 @@ class ZRBConfig:
 	if self.config.has_option(vault, option):
 	    return self.config.get(vault, option)
 	else:
-	    raise ZRBValueError("Required option \"" + option + "\" not set.")
+	    raise ZEBUValueError("Required option \"" + option + "\" not set.")
 
     def hasVault(self, vault):
 	if vault in self.getVaultNames():
@@ -123,12 +123,12 @@ class ZRBConfig:
 
     def getVault(self, name):
 	if name in self.getVaultNames():
-	    return ZRBVault(name, self)
+	    return ZEBUVault(name, self)
 	else:
-	    raise ZRBError("Vault " + name + " does not exist in " + str(self))
+	    raise ZEBUError("Vault " + name + " does not exist in " + str(self))
 
 
-class ZRBVault:
+class ZEBUVault:
     def __init__(self, name, config):
 	self.name = name
 	self.config = config
@@ -136,7 +136,7 @@ class ZRBVault:
 	self.tree_path = self.path + "/tree"
 	self.rsync_log = self.path + "/rsync_log"
 	self.exclude_path = self.path + "/excludes"
-	self.logger = ZRBErrorLogger(self.path + "/zrb_log")
+	self.logger = ZEBUErrorLogger(self.path + "/zebu_log")
 	self.use_excludes = False
 
     excludes = property(fget=lambda self: 
@@ -178,13 +178,13 @@ class ZRBVault:
 	try:
 	    fd = open(self.rsync_log, 'w')
 	except OSError, e:
-	    raise ZRBError("Could not open rsync log (aborting): " + self.rsync_log)
+	    raise ZEBUError("Could not open rsync log (aborting): " + self.rsync_log)
 
 	try:
 	    proc = Popen(rsync_cmd, stdin=None, stdout=fd, stderr=fd)
 	    ret = proc.wait()
 	except OSError, e:
-	    raise ZRBError("rsync failed, aborting backup " + self.name)
+	    raise ZEBUError("rsync failed, aborting backup " + self.name)
 
 	# return codes shamelessly stolen from dirvish
 	retcodes = {
@@ -235,9 +235,9 @@ class ZRBVault:
 	try:
 	    m = os.stat(self.path)[ST_MODE]
 	except OSError, e:
-	    raise ZRBError("Repository not found: " + self.path)
+	    raise ZEBUError("Repository not found: " + self.path)
 	if not S_ISDIR(m):
-	    raise ZRBError("Repository path not a directory: " + self.path)
+	    raise ZEBUError("Repository path not a directory: " + self.path)
 
 	# check tree ISDIR (create, warn)
 	try:
@@ -248,14 +248,14 @@ class ZRBVault:
 		os.mkdir(self.tree_path, 0755)
 		self.logger.logWarning("Created tree directory.")
 	    except OSError:
-		raise ZRBError("Tree could not be created for vault " + self.name)
+		raise ZEBUError("Tree could not be created for vault " + self.name)
 
 	# Build rsync exclusions
 	if self.excludes != "":
 	    try:
 		ex = open(self.excludes, 'r')
 	    except:
-		raise ZRBError("Couldn't open excludes file: " + self.excludes)
+		raise ZEBUError("Couldn't open excludes file: " + self.excludes)
 	    try:
 		myex = open(self.exclude_path, 'w')
 		line = ex.readline()
@@ -266,12 +266,12 @@ class ZRBVault:
 		ex.close()
 		self.use_excludes = True
 	    except:
-		raise ZRBError("Can't create excludes file: " + self.exclude_path)
+		raise ZEBUError("Can't create excludes file: " + self.exclude_path)
 	if self.additional_excludes != "":
 	    try:
 		ex = open(self.additional_excludes, 'r')
 	    except:
-		raise ZRBError("Couldn't open additional excludes file: " + self.additional_excludes)
+		raise ZEBUError("Couldn't open additional excludes file: " + self.additional_excludes)
 	    try:
 		myex = open(self.exclude_path, 'a')
 		line = ex.readline()
@@ -282,7 +282,7 @@ class ZRBVault:
 		ex.close()
 		self.use_excludes = True
 	    except:
-		raise ZRBError("Can't append additional excludes file: " + self.exclude_path)
+		raise ZEBUError("Can't append additional excludes file: " + self.exclude_path)
 
 	# If we aren't using an excludes file, we shouldn't have one.
 	if self.use_excludes == False:
@@ -300,7 +300,7 @@ class ZRBVault:
 
 
 def usage():
-    print "zrb [options]"
+    print "zebu [options]"
     print
     print "-h, --help		Print a usage summary"
     print "-f, --config <file>	Use config file at <file>"
@@ -338,8 +338,8 @@ def main():
 
     # Load the configuration
     try:
-	config = ZRBConfig(ConfigFile)
-    except ZRBError, e:
+	config = ZEBUConfig(ConfigFile)
+    except ZEBUError, e:
 	print e
 	sys.exit(2)
 
@@ -356,12 +356,12 @@ def main():
 	    print "Dumping vault: " + vname
 	try:
 	    vault = config.getVault(vname)
-	except ZRBError, e:
+	except ZEBUError, e:
 	    print str(e)
 	    continue
 	try:
 	    vault.backup()
-	except ZRBError, e:
+	except ZEBUError, e:
 	    print str(e)
 
 

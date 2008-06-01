@@ -134,6 +134,9 @@ class ZFSfs:
 	self.config = config
 	self.path = "/" + name
 
+    def snapshot(self):
+	pass
+
 
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):
@@ -168,6 +171,12 @@ class ZEBUVault(ZFSfs):
 			self.config.getOption(self.name, "basepath"),
 		    fset=None, fdel=None,
 		    doc="more rsync excludes")
+
+    def snapshot(self):
+	if self.backup():
+	    ZFSfs.snapshot(self)
+	else:
+	    return False
 
     def backup(self):
 	self.verify()
@@ -220,8 +229,8 @@ class ZEBUVault(ZFSfs):
 	    127 : [ 'fatal',       "command not found" ]
 	}
 
+	type = retcodes[ret][0]
 	try:
-	    type = retcodes[ret][0]
 	    if type == 'error' or type == 'fatal':
 		self.logger.logError(retcodes[ret][1])
 	    if type == 'check' or type == 'warning':
@@ -233,7 +242,12 @@ class ZEBUVault(ZFSfs):
 
 	# save rsync log
 	self.logger.flush()
-	# zfs snapshot
+
+	# Checks and warnings can happen on a (mostly) successful backup
+	if type == 'success' or type == 'warning' or type == 'check':
+	    return True
+	else
+	    return False
 
     def verify(self):
 	# check repopath ISDIR
@@ -365,7 +379,8 @@ def main():
 	    print str(e)
 	    continue
 	try:
-	    vault.backup()
+	    if vault.snapshot() == False and Verbose:
+		print vname + ": snapshot failed"
 	except ZEBUError, e:
 	    print str(e)
 

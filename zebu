@@ -135,13 +135,26 @@ class ZFSfs:
 	self.config = config
 	self.path = "/" + name
 
-    def snapshot(self):
-	pass
+    def getZFSProperty(self, prop):
+	try:
+	    po = Popen([self.zfs_path, 'list', '-o', prop, self.name],
+		      stdout=PIPE,stderr=PIPE)
+	except OSError, e:
+	    raise ZEBUError("Cannot obtain ZFS properties for " + self.name)
+
+	out = po.communicate()[0]
+	if po.returncode != 0:
+	    raise ZEBUError("Problem obtaining ZFS properties for " + self.name)
+
+	return out.splitlines()[1]
 
     zfs_path = property(fget=lambda self: 
 			self.config.getOption(self.name, "zfs_path"),
 		    fset=None, fdel=None,
 		    doc="path to zfs binary")
+
+    def snapshot(self):
+	pass
 
 
 class ZEBUVault(ZFSfs):

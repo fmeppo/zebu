@@ -6,7 +6,7 @@
 
 import os, sys, getopt, ConfigParser, time
 from stat import *
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, call
 
 
 class ZEBUError:
@@ -156,7 +156,16 @@ class ZFSfs:
 		    fset=None, fdel=None, doc="path to zfs binary")
 
     def snapshot(self):
-	pass
+	snaptime = time.strftime("%Y%m%d%H%M%S", time.localtime())
+	snapname = self.name + '@' + 'snap-' + snaptime
+	try:
+	    ret = call([self.zfs_path, 'snapshot', snapname])
+	except OSError, e:
+	    raise ZEBUError("Could not execute snapshot for " + self.name)
+	if ret == 0:
+	    return True
+	else:
+	    raise ZEBUError("Error creating snapshot " + snapname)
 
 
 class ZEBUVault(ZFSfs):

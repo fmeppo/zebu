@@ -6,7 +6,7 @@
 
 import os, sys, getopt, ConfigParser, time
 from stat import *
-from subprocess import Popen
+from subprocess import Popen, PIPE
 
 
 class ZEBUError:
@@ -133,7 +133,6 @@ class ZFSfs:
     def __init__(self, name, config):
 	self.name = name
 	self.config = config
-	self.path = "/" + name
 
     def getZFSProperty(self, prop):
 	try:
@@ -148,10 +147,13 @@ class ZFSfs:
 
 	return out.splitlines()[1]
 
+    path = property(fget=lambda self:
+			self.getZFSProperty('mountpoint'),
+		    fset=None, fdel=None, doc="mountpoint for filesystem")
+
     zfs_path = property(fget=lambda self: 
 			self.config.getOption(self.name, "zfs_path"),
-		    fset=None, fdel=None,
-		    doc="path to zfs binary")
+		    fset=None, fdel=None, doc="path to zfs binary")
 
     def snapshot(self):
 	pass

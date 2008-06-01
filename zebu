@@ -137,6 +137,11 @@ class ZFSfs:
     def snapshot(self):
 	pass
 
+    zfs_path = property(fget=lambda self: 
+			self.config.getOption(self.name, "zfs_path"),
+		    fset=None, fdel=None,
+		    doc="path to zfs binary")
+
 
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):
@@ -160,17 +165,17 @@ class ZEBUVault(ZFSfs):
     rsync_path = property(fget=lambda self: 
 			self.config.getOption(self.name, "rsync_path"),
 		    fset=None, fdel=None,
-		    doc="more rsync excludes")
+		    doc="path to rsync binary")
 
     rsync_server = property(fget=lambda self: 
 			self.config.getOption(self.name, "rsync_server"),
 		    fset=None, fdel=None,
-		    doc="more rsync excludes")
+		    doc="remote server for rsync")
 
     basepath = property(fget=lambda self: 
 			self.config.getOption(self.name, "basepath"),
 		    fset=None, fdel=None,
-		    doc="more rsync excludes")
+		    doc="remote directory for rsync")
 
     def snapshot(self):
 	if self.backup():

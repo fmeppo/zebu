@@ -88,7 +88,8 @@ class ZEBUConfig:
 	# hardcoded defaults
 	self.defaults = {'excludes': None,
 			 'additional_excludes': None,
-			 'rsync_path': 'rsync'
+			 'rsync_path': 'rsync',
+			 'zfs_path': '/sbin/zfs'
 			}
 
 	config = ConfigParser.SafeConfigParser(self.defaults)

@@ -170,7 +170,10 @@ class ZFSfs:
 	snaptime = time.strftime("%Y%m%d%H%M%S", time.localtime())
 	snapname = self.name + '@' + 'snap-' + snaptime
 	try:
-	    ret = call([self.zfs_path, 'snapshot', snapname])
+	    if self.recurse:
+		ret = call([self.zfs_path, 'snapshot', '-r', snapname])
+	    else:
+		ret = call([self.zfs_path, 'snapshot', snapname])
 	except OSError, e:
 	    raise ZEBUError("Could not execute snapshot for " + self.name)
 	if ret == 0:

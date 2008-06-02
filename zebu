@@ -89,7 +89,8 @@ class ZEBUConfig:
 	self.defaults = {'excludes': None,
 			 'additional_excludes': None,
 			 'rsync_path': 'rsync',
-			 'zfs_path': '/sbin/zfs'
+			 'zfs_path': '/sbin/zfs',
+			 'recurse': 'no'
 			}
 
 	config = ConfigParser.SafeConfigParser(self.defaults)
@@ -147,6 +148,16 @@ class ZFSfs:
 
 	return out.splitlines()[1]
 
+    def __getRecursion__(self):
+	r = self.config.getOption(self.name, "recurse")
+	if r in ['yes','Yes','true','True','1','y']:
+	    return True
+	else:
+	    return False
+
+    recurse = property(fget=__getRecursion__, fset=None, fdel=None,
+		       doc="Bool to indicate whether ZFS actions are recursive")
+
     path = property(fget=lambda self:
 			self.getZFSProperty('mountpoint'),
 		    fset=None, fdel=None, doc="mountpoint for filesystem")
@@ -176,6 +187,7 @@ class ZEBUVault(ZFSfs):
 	self.exclude_path = self.path + "/excludes"
 	self.logger = ZEBUErrorLogger(self.path + "/zebu_log")
 	self.use_excludes = False
+	self.recurse = False
 
     excludes = property(fget=lambda self: 
 			self.config.getOption(self.name, "excludes"),

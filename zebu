@@ -368,7 +368,7 @@ def usage():
     print
     print "-h, --help		Print a usage summary"
     print "-f, --config <file>	Use config file at <file>"
-    print "-v, --verbose	Be rather verbose"
+    print "-v, --verbose		Be rather verbose"
 
 
 def main():

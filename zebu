@@ -375,6 +375,7 @@ def usage():
     print "-h, --help		Print a usage summary"
     print "-f, --config <file>	Use config file at <file>"
     print "-v, --verbose		Be rather verbose"
+    print "-s, --no-snapshot		Skip the snapshot phase"
 
 
 def main():
@@ -383,10 +384,11 @@ def main():
     InitMode = False
     SingleShotVault = None
     Verbose = False
+    DoSnapshot = True
 
     # Collect command-line args
     try:
-	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:v", ["help","config=","init","vault=","verbose"] )
+	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:vs", ["help","config=","init","vault=","verbose","no-snapshot"] )
     except getopt.GetoptError:
 	print "Invalid option found."
 	usage()
@@ -405,6 +407,8 @@ def main():
 	    SingleShotVault = a
 	elif o in ("-v", "--verbose"):
 	    Verbose = True
+	elif o in ("-s", "--no-snapshot"):
+	    DoSnapshot = False
 
     # Load the configuration
     try:
@@ -429,11 +433,13 @@ def main():
 	except ZEBUError, e:
 	    print str(e)
 	    continue
-	try:
-	    if vault.snapshot() == False and Verbose:
-		print vname + ": snapshot failed"
-	except ZEBUError, e:
-	    print str(e)
+
+	if DoSnapshot:
+	    try:
+		if vault.snapshot() == False and Verbose:
+		    print vname + ": snapshot failed"
+	    except ZEBUError, e:
+		print str(e)
 
 
 if __name__ == "__main__":

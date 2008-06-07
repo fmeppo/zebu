@@ -184,6 +184,26 @@ class ZFSfs:
 	else:
 	    raise ZEBUError("Error creating snapshot " + snapname)
 
+    def __buildSnapshots__(self):
+	"""
+	Builds the internal list of snapshots.  Call again to rebuild.
+	"""
+	self.snapshots = []
+	try:
+	    po = Popen([self.zfs_path, 'list', '-o', 'name', '-H',
+			'-t', 'snapshot'],
+		       stdout=PIPE,stderr=PIPE)
+	except OSError, e:
+	    raise ZEBUError("Cannot obtain ZFS snapshot list")
+
+	out = po.communicate()[0].splitlines()
+	if po.returncode != 0:
+	    raise ZEBUError("Problem obtaining ZFS snapshot list")
+	prefix = self.name + '@'
+	for line in out:
+	    if line.startswith(prefix):
+		pass
+
 
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):

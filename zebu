@@ -125,12 +125,9 @@ class ZEBUConfig:
 
     def getVault(self, name):
 	if name in self.getVaultNames():
-	    print "Building vault for " + name
 	    if self.config.has_option(name, "rsync_server"):
-		print "using ZEBUVault"
 		return ZEBUVault(name, self)
 	    else:
-		print "using ZFSfs"
 		return ZFSfs(name, self)
 	else:
 	    raise ZEBUError("Vault " + name + " does not exist in " + str(self))
@@ -427,7 +424,7 @@ def main():
 
     for vname in vaults:
 	if Verbose:
-	    print "Dumping vault: " + vname
+	    print "Selecting vault: " + vname
 	try:
 	    vault = config.getVault(vname)
 	except ZEBUError, e:
@@ -440,6 +437,11 @@ def main():
 		    print vname + ": snapshot failed"
 	    except ZEBUError, e:
 		print str(e)
+	elif Verbose:
+	    print vname + ": skipping snapshot"
+
+	if Verbose:
+	    print "Completed vault: " + vname
 
 
 if __name__ == "__main__":

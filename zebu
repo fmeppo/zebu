@@ -138,6 +138,7 @@ class ZFSfs:
     def __init__(self, name, config):
 	self.name = name
 	self.config = config
+	self.__buildSnapshots__()
 
     def getZFSProperty(self, prop):
 	try:

@@ -221,7 +221,7 @@ class ZFSfs:
 	"""
 	Delete expired snapshots.
 	"""
-	pass
+	return None
 
 
 class ZEBUVault(ZFSfs):
@@ -502,7 +502,7 @@ def main():
 		clean = vault.cleanup()
 		if clean == False and Verbose:
 		    print vname + ": cleanup failed"
-		elif Verbose:
+		elif clean != None and Verbose:
 		    for snap in clean:
 			print vname + ": deleted snapshot " + snap
 	    except ZEBUError, e:

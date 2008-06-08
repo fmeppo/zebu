@@ -5,14 +5,58 @@
 zebu \- ZFS-based network filesystem backup tool
 .SH SYNOPSIS
 .B zebu
-.I [global options] <file> <command> [command arguments]
+.I [options]
 .SH "DESCRIPTION"
-Create a backup image of a client directory tree, and keep old backups as
-ZFS snapshots.
+Create backups, including backups of remote machines, using ZFS snapshots.
+.PP
+.BR zebu
+takes a configured list of ZFS file systems and performs regular backup
+tasks.  This can include copying data from a remote server to the local
+file system using
+.BR rsync
+, and generally includes making snapshots, deleting old snapshots, and
+may someday include transporting incremental snapshots to a remote machine
+for off-site archival.
+.PP
+Backups take place in a series of phases, described below.
+.BR zebu
+iterates over each ZFS file system, and runs through all applicable phases
+in turn (rather than running one phase at a time across each file system).
 .PP
 More documentation about
 .BR zebu
 will be forthcoming.  Someday.
+.SH PHASES
+.SS Snapshotting
+ZFS snapshots are created, using the configured prefix with the current time
+stamp appended as a snapshot name.  Time stamps are of the form
+.I <year><month><day><hour><minute><second>
+and are listed numerically (e.g., snap-20080607204837).
+.PP
+A file system with a defined
+.I rsync_server
+(see \fBzebu.conf(5)\fP for details) will be assumed to contain a copy of
+files on a remote system.
+.BR zebu
+will use
+.BR rsync
+to copy files into the ZFS file system.  Files will be copied into the
+.I tree
+subdirectory.  Additionally, three log files will be created:
+\fIexcludes\fP, which contains a list of exclude patterns used during the
+\fBrsync\fP, \fIrsync_log\fP, which contains the log of the \fBrsync\fP
+process itself, and \fIzebu_log\fP, which lists applicable messages from
+.BR zebu
+during the transfer.  Once the rsync process is completed successfully,
+and all log files created, the ZFS file system receives a snapshot.  If the
+.BR rsync
+did not complete successfully, no snapshot is created.
+.PP
+Following any
+.BR rsync
+transfers, all ZFS file systems are treated identically through the remaining
+.BR zebu
+phases.
 .SH OPTIONS
 .TP
 \fB\-h\fR, \fB\-\-help\fR

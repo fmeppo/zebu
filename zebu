@@ -90,7 +90,8 @@ class ZEBUConfig:
 			 'additional_excludes': None,
 			 'rsync_path': 'rsync',
 			 'zfs_path': '/sbin/zfs',
-			 'recurse': 'no'
+			 'recurse': 'no',
+			 'snap_prefix': 'snap-'
 			}
 
 	config = ConfigParser.SafeConfigParser(self.defaults)
@@ -158,6 +159,11 @@ class ZFSfs:
 	else:
 	    return False
 
+    snap_prefix = property(fget=lambda self:
+				self.config.getOption(self.name, "snap_prefix"),
+			fset=None, fdel=None,
+			doc="Prefix for new snapshots")
+
     recurse = property(fget=__getRecursion__, fset=None, fdel=None,
 		       doc="Bool to indicate whether ZFS actions are recursive")
 
@@ -171,7 +177,7 @@ class ZFSfs:
 
     def snapshot(self):
 	snaptime = time.strftime("%Y%m%d%H%M%S", time.localtime())
-	snapname = self.name + '@' + 'snap-' + snaptime
+	snapname = self.name + '@' + self.snap_prefix + snaptime
 	try:
 	    if self.recurse:
 		ret = call([self.zfs_path, 'snapshot', '-r', snapname])

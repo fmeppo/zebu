@@ -139,6 +139,7 @@ class ZFSfs:
 	self.name = name
 	self.config = config
 	self.__buildSnapshots__()
+	self.expiretime = 4000000 # 4 days
 
     def getZFSProperty(self, prop):
 	"""
@@ -221,6 +222,12 @@ class ZFSfs:
 	"""
 	Delete expired snapshots.
 	"""
+	timestr = time.strftime("%Y%m%d%H%M%S", time.localtime())
+	threshold = int(timestr) - self.expiretime
+	for snap in self.snapshots:
+	    print self.name + " found " + snap
+	    if int(snap) < threshold:
+		print "DELETE " + snap
 	return None
 
 

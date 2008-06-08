@@ -141,6 +141,9 @@ class ZFSfs:
 	self.__buildSnapshots__()
 
     def getZFSProperty(self, prop):
+	"""
+	Get arbitrary properties off the ZFS file system.
+	"""
 	try:
 	    po = Popen([self.zfs_path, 'list', '-o', prop, self.name],
 		      stdout=PIPE,stderr=PIPE)
@@ -177,6 +180,9 @@ class ZFSfs:
 		    fset=None, fdel=None, doc="path to zfs binary")
 
     def snapshot(self):
+	"""
+	Snapshot a ZFS filesystem.
+	"""
 	snaptime = time.strftime("%Y%m%d%H%M%S", time.localtime())
 	snapname = self.name + '@' + self.snap_prefix + snaptime
 	try:
@@ -254,12 +260,18 @@ class ZEBUVault(ZFSfs):
 		    doc="remote directory for rsync")
 
     def snapshot(self):
+	"""
+	Override base class snapshot, to do an rsync then do a snapshot.
+	"""
 	if self.backup():
 	    ZFSfs.snapshot(self)
 	else:
 	    return False
 
     def backup(self):
+	"""
+	Do an rsync-based backup.
+	"""
 	self.verify()
 
 	# rsync, using hardcoded options.
@@ -331,6 +343,9 @@ class ZEBUVault(ZFSfs):
 	    return False
 
     def verify(self):
+	"""
+	Verify all the pieces of a filesystem, in preparation for an rsync.
+	"""
 	# check repopath ISDIR
 	try:
 	    m = os.stat(self.path)[ST_MODE]

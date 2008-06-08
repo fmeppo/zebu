@@ -205,10 +205,10 @@ class ZFSfs:
 	out = po.communicate()[0].splitlines()
 	if po.returncode != 0:
 	    raise ZEBUError("Problem obtaining ZFS snapshot list")
-	prefix = self.name + '@'
+	prefix = self.name + '@' + self.snap_prefix
 	for line in out:
 	    if line.startswith(prefix):
-		pass
+		self.snapshots.append(line.split(prefix)[1])
 
 
 class ZEBUVault(ZFSfs):

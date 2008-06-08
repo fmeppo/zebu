@@ -91,7 +91,7 @@ class ZEBUConfig:
 			 'rsync_path': 'rsync',
 			 'zfs_path': '/sbin/zfs',
 			 'recurse': 'no',
-			 'snap_prefix': 'snap-'
+			 'snap_prefix': 'zebu-'
 			}
 
 	config = ConfigParser.SafeConfigParser(self.defaults)

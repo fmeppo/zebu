@@ -211,6 +211,12 @@ class ZFSfs:
 	    if line.startswith(prefix):
 		self.snapshots.append(line.split(prefix)[1])
 
+    def cleanup(self):
+	"""
+	Delete expired snapshots.
+	"""
+	pass
+
 
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):
@@ -409,6 +415,7 @@ def main():
     SingleShotVault = None
     Verbose = False
     DoSnapshot = True
+    DoCleanup = True
 
     # Collect command-line args
     try:
@@ -433,6 +440,8 @@ def main():
 	    Verbose = True
 	elif o in ("-s", "--no-snapshot"):
 	    DoSnapshot = False
+	elif o in ("-c", "--no-cleanup"):
+	    DoCleanup = False
 
     # Load the configuration
     try:
@@ -458,6 +467,9 @@ def main():
 	    print str(e)
 	    continue
 
+	#
+	# Run snapshot phase
+	#
 	if DoSnapshot:
 	    try:
 		if vault.snapshot() == False and Verbose:
@@ -466,6 +478,22 @@ def main():
 		print str(e)
 	elif Verbose:
 	    print vname + ": skipping snapshot"
+
+	#
+	# Run cleanup phase
+	#
+	if DoCleanup:
+	    try:
+		clean = vault.cleanup()
+		if clean == False and Verbose:
+		    print vname + ": cleanup failed"
+		elif Verbose:
+		    for snap in clean:
+			print vname + ": deleted snapshot " + snap
+	    except ZEBUError, e:
+		print str(e)
+	elif Verbose:
+	    print vname + ": skipping cleanup"
 
 	if Verbose:
 	    print "Completed vault: " + vname

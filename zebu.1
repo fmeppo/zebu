@@ -57,6 +57,15 @@ Following any
 transfers, all ZFS file systems are treated identically through the remaining
 .BR zebu
 phases.
+.SS Cleanup
+Any snapshot older than indicated in the
+\fItime_to_live\fP configuration file parameter is deleted.  Age is determined
+by comparing the current time with the time portion of a snapshot name.
+.PP
+.BR Zebu
+only concerns itself with snapshots whose names begin with the
+.I snap_prefix
+configuration parameter.  All other snapshots are ignored.
 .SH OPTIONS
 .TP
 \fB\-h\fR, \fB\-\-help\fR
@@ -72,6 +81,9 @@ Be a bit more verbose, and provide status messages during a run.
 .TP
 \fB\-s\fR, \fB\-\-no-snapshot\fR
 Skip the snapshot phase, and continue to the next phase.
+.TP
+\fB\-c\fR, \fB\-\-no-cleanup\fR
+Skip the cleanup phase, and continue to the next phase.
 .SH CONFIGURATION FILE
 More on this later.
 .SS subsection

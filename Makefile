@@ -17,3 +17,4 @@ zebu.1.gz: zebu.1
 
 install: all
 	install -m 0444 $(INSTFLAGS) zebu.1.gz $(PREFIX)/man/man1
+	install -m 0555 $(INSTFLAGS) zebu $(PREFIX)/sbin

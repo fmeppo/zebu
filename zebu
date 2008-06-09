@@ -219,7 +219,7 @@ class ZFSfs:
 	except OSError, e:
 	    raise ZEBUError("Could not execute snapshot for " + self.name)
 	if ret == 0:
-	    return True
+	    return snapname
 	else:
 	    raise ZEBUError("Error creating snapshot " + snapname)
 
@@ -250,7 +250,6 @@ class ZFSfs:
 	threshold = int(time.strftime("%Y%m%d%H%M%S", self.expiretime))
 	deleted = []
 	for snap in self.snapshots:
-	    print self.name + " found " + snap
 	    if int(snap) < threshold:
 		snapname = self.name + '@' + self.snap_prefix + snap
 		try:
@@ -310,7 +309,7 @@ class ZEBUVault(ZFSfs):
 	Override base class snapshot, to do an rsync then do a snapshot.
 	"""
 	if self.backup():
-	    ZFSfs.snapshot(self)
+	    return ZFSfs.snapshot(self)
 	else:
 	    return False
 
@@ -467,6 +466,7 @@ def usage():
     print "-f, --config <file>	Use config file at <file>"
     print "-v, --verbose		Be rather verbose"
     print "-s, --no-snapshot		Skip the snapshot phase"
+    print "-c, --no-cleanup		Skip the cleanup phase"
 
 
 def main():
@@ -533,8 +533,11 @@ def main():
 	#
 	if DoSnapshot:
 	    try:
-		if vault.snapshot() == False and Verbose:
+		snap = vault.snapshot()
+		if snap == False and Verbose:
 		    print vname + ": snapshot failed"
+		else:
+		    print "Created snapshot " + snap
 	    except ZEBUError, e:
 		print str(e)
 	elif Verbose:

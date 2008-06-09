@@ -248,11 +248,26 @@ class ZFSfs:
 	Delete expired snapshots.
 	"""
 	threshold = int(time.strftime("%Y%m%d%H%M%S", self.expiretime))
+	deleted = []
 	for snap in self.snapshots:
 	    print self.name + " found " + snap
 	    if int(snap) < threshold:
-		print "DELETE " + snap
-	return None
+		snapname = self.name + '@' + self.snap_prefix + snap
+		try:
+		    if self.recurse:
+			po = Popen([self.zfs_path, 'destroy', '-r', snapname])
+		    else:
+			po = Popen([self.zfs_path, 'destroy', snapname])
+		    po.communicate()
+		except OSError, e:
+		    raise ZEBUError("Cannot obtain ZFS snapshot list")
+		if po.returncode != 0:
+		    raise ZEBUError("Error deleting snapshot " + snapname)
+		deleted.append(snapname)
+	if len(deleted) > 0:
+	    return deleted
+	else:
+	    return None
 
 
 class ZEBUVault(ZFSfs):

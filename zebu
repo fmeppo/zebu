@@ -139,7 +139,7 @@ class ZFSfs:
 	self.name = name
 	self.config = config
 	self.__buildSnapshots__()
-	self.expiretime = 4000000 # 4 days
+	self.expiretime = self.__getExpiretime__()
 
     def getZFSProperty(self, prop):
 	"""
@@ -163,6 +163,31 @@ class ZFSfs:
 	    return True
 	else:
 	    return False
+
+    def __getExpiretime__(self):
+	r = self.config.getOption(self.name, "expiretime")
+	et = r.split(':')
+	if len(et) > 4:
+	    raise ZEBUError("Invalid expiretime for " + self.name + ": " + r)
+	times = []
+	try:
+	    for elem in et:
+		times.append(int(elem))
+	except ValueError:
+	    raise ZEBUError("Invalid expiretime for " + self.name + ": " + r)
+
+	# Convert time to seconds
+	sec = times[0] * 24	# hours
+	if len(times) > 1:
+	    sec += times[1]
+	sec = sec * 60		# minutes
+	if len(times) > 2:
+	    sec += times[2]
+	sec = sec * 60		# seconds
+	if len(times) > 3:
+	    sec += times[3]
+
+	return time.localtime(time.time() - sec)
 
     snap_prefix = property(fget=lambda self:
 				self.config.getOption(self.name, "snap_prefix"),
@@ -222,8 +247,7 @@ class ZFSfs:
 	"""
 	Delete expired snapshots.
 	"""
-	timestr = time.strftime("%Y%m%d%H%M%S", time.localtime())
-	threshold = int(timestr) - self.expiretime
+	threshold = int(time.strftime("%Y%m%d%H%M%S", self.expiretime))
 	for snap in self.snapshots:
 	    print self.name + " found " + snap
 	    if int(snap) < threshold:

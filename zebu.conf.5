@@ -23,7 +23,18 @@ pairs.
 Section names should be on lines by themselves, surrounded by square brackets
 (\fB[]\fR).  Each section name is assumed to be a ZFS file system
 .BR zebu
-should manipulate.
+should manipulate.  The name
+.BR DEFAULT
+has special meaning; values defined in the
+.BR DEFAULT
+section are taken as defaults for all other sections.  These values can
+be overridden on a section-by-section basis.
+.PP
+In a \fBvalue\fR portion of a \fBkey=value\fR pair, the string
+.BR %(dir)s
+will be replaced by the current section name.  This is useful for inserting
+the file system name into a default option.
+.SH "AVAILABLE KEYS"
 
 
 

@@ -364,7 +364,7 @@ class ZEBUVault(ZFSfs):
 	    124 : [ 'fatal',       "remote shell failed" ],
 	    125 : [ 'error',       "remote shell killed" ],
 	    126 : [ 'fatal',       "command could not be run" ],
-	    127 : [ 'fatal',       "command not found" ]
+	    127 : [ 'fatal',       "command not found" ],
 	    255 : [ 'fatal',       "rsync killed?" ]
 	}
 

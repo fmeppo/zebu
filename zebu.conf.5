@@ -1,0 +1,36 @@
+.TH ZEBU.CONF 5
+.\" NAME should be all caps, SECTION should be 1-8, maybe w/ subsection
+.\" other parms are allowed; see man(7), man(1)
+.SH NAME
+zebu.conf \- configuration file for zebu
+.SH "DESCRIPTION"
+The zebu.conf config file provides information about ZFS filesystems for
+zebu to manage.  By default,
+.BR zebu
+will look in
+.I /usr/local/etc/zebu/zebu.conf
+followed by
+.I /etc/zebu/zebu.conf
+for a config file, and use the first file found.
+.PP
+The file format is rather simple, and follows a layout common to many other
+programs' config files.  Lines beginning with a hash (#) are assumed to be
+comments.  The file itself is divided into sections, with each section
+containing zero or more
+.BR key=value
+pairs.
+.PP
+Section names should be on lines by themselves, surrounded by square brackets
+(\fB[]\fR).  Each section name is assumed to be a ZFS file system
+.BR zebu
+should manipulate.
+
+
+
+.SH "KNOWN ISSUES"
+The documentation for
+.B zebu.conf
+is woefully incomplete.
+.SH AUTHOR
+\fBzebu\fR was written by Mike Shuey <shuey@fmepnet.org> and is licensed under
+the terms of the GNU Public License, version 2 or higher.

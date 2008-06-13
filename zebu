@@ -365,6 +365,7 @@ class ZEBUVault(ZFSfs):
 	    125 : [ 'error',       "remote shell killed" ],
 	    126 : [ 'fatal',       "command could not be run" ],
 	    127 : [ 'fatal',       "command not found" ]
+	    255 : [ 'fatal',       "rsync killed?" ]
 	}
 
 	type = retcodes[ret][0]
@@ -480,7 +481,7 @@ def main():
 
     # Collect command-line args
     try:
-	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:vs", ["help","config=","init","vault=","verbose","no-snapshot"] )
+	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:vsc", ["help","config=","init","vault=","verbose","no-snapshot","no-cleanup"] )
     except getopt.GetoptError:
 	print "Invalid option found."
 	usage()

@@ -35,7 +35,57 @@ In a \fBvalue\fR portion of a \fBkey=value\fR pair, the string
 will be replaced by the current section name.  This is useful for inserting
 the file system name into a default option.
 .SH "AVAILABLE KEYS"
+.BR zebu
+will use the following keys to adjust its behavior:
+.TP
+\fBbasepath\fR
+This is the base path for the remote end of \fBrsync\fR-based backups.
 
+\fBbasepath\fR is only valid for \fBrsync\fR backup file systems, and is
+silently ignored for conventional ZFS file systems.
+.TP
+\fBrsync_server\fR
+The remote server to use for \fBrsync\fR-based backups.  If an
+\fBrsync_server\fR is specified, the file system is assumed to contain a
+copy of another machine.  If no \fBrsync_server\fR is specified, the file
+system is assumed to be a normal ZFS file system.
+.TP
+\fBrsync_path\fR
+Path to the \fBrsync\fR command on the local system.  Only valid for
+\fBrsync\fR-based backup file systems.
+
+Defaults to \fIrsync\fR (so the current PATH will be searched).
+.TP
+\fBzfs_path\fR
+Path to the 
+.BR zfs
+executable.  Defaults to \fI/usr/bin/zfs\fR.
+.TP
+\fBexcludes\fR
+Path to a file containing \fBrsync\fR excludes.  This contents of this file
+are passed to the
+.BR rsync
+command during an \fBrsync\fR-based backup.
+
+In general, this option will be used to provide the default excludes in the
+.I DEFAULT
+section.
+
+This is silently ignored for normal ZFS file systems.
+.TP
+\fBadditional_excludes\fR
+Path to a file containing additional \fBrsync\fR excludes.  The contents of
+this file are appended to the configured \fBexcludes\fR file (if any), and
+passed to the
+.BR rsync
+command during an \fBrsync\fR-based backup.
+
+In general, this option will be used to add server-specific excludes (on top
+of the default excludes) during an
+.BR rsync
+backup.
+
+This is silently ignored for normal ZFS file systems.
 
 
 .SH "KNOWN ISSUES"

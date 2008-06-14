@@ -74,6 +74,21 @@ section.
 This is silently ignored for normal ZFS file systems.
 .\"
 .TP
+\fBexpiretime\fR
+\fBzebu\fR's "cleanup" phase will delete old ZFS snapshots.  Snapshots are
+considered old if they are have aged more than \fIexpiretime\fR.
+
+\fBexpiretime\fR is expressed as a :-separated time - 
+.I <days>:<hours>:<minutes>:<seconds>
+.\"
+.TP
+\fBrecurse\fR
+If set to \fIyes\fR (or \fItrue\fR, or \fI1\fR), \fBzebu\fR will create
+and delete snapshots recursively on a given ZFS file system.  This option is
+silently ignored for an \fBrsync\fR-based backup file system (mainly because
+it doesn't make sense in that context).
+.\"
+.TP
 \fBrsync_path\fR
 Path to the \fBrsync\fR command on the local system.  Only valid for
 \fBrsync\fR-based backup file systems.

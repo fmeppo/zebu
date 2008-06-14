@@ -78,6 +78,9 @@ This is silently ignored for normal ZFS file systems.
 \fBzebu\fR's "cleanup" phase will delete old ZFS snapshots.  Snapshots are
 considered old if they are have aged more than \fIexpiretime\fR.
 
+.BR zebu
+will never attempt to delete snapshots if only one snapshot is remaining.
+
 \fBexpiretime\fR is expressed as a :-separated time - 
 .I <days>:<hours>:<minutes>:<seconds>
 .\"

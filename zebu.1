@@ -66,6 +66,12 @@ by comparing the current time with the time portion of a snapshot name.
 only concerns itself with snapshots whose names begin with the
 .I snap_prefix
 configuration parameter.  All other snapshots are ignored.
+.PP
+.BR Zebu
+will never attempt to delete snapshots if only one snapshot is remaining.
+This is intended to preserve at least one good snapshot, to avoid potentially
+removing the last remaining viable backup (particularly important for
+\fBrsync\fR-based backup file systems).
 .SH OPTIONS
 .TP
 \fB\-h\fR, \fB\-\-help\fR

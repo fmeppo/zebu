@@ -249,20 +249,22 @@ class ZFSfs:
 	"""
 	threshold = int(time.strftime("%Y%m%d%H%M%S", self.expiretime))
 	deleted = []
-	for snap in self.snapshots:
-	    if int(snap) < threshold:
-		snapname = self.name + '@' + self.snap_prefix + snap
-		try:
-		    if self.recurse:
-			po = Popen([self.zfs_path, 'destroy', '-r', snapname])
-		    else:
-			po = Popen([self.zfs_path, 'destroy', snapname])
-		    po.communicate()
-		except OSError, e:
-		    raise ZEBUError("Cannot obtain ZFS snapshot list")
-		if po.returncode != 0:
-		    raise ZEBUError("Error deleting snapshot " + snapname)
-		deleted.append(snapname)
+	# Under no circumstances should we ever delete the last snapshot.
+	if len(self.snapshots) > 1:
+	    for snap in self.snapshots:
+		if int(snap) < threshold:
+		    snapname = self.name + '@' + self.snap_prefix + snap
+		    try:
+			if self.recurse:
+			    po = Popen([self.zfs_path, 'destroy', '-r', snapname])
+			else:
+			    po = Popen([self.zfs_path, 'destroy', snapname])
+			po.communicate()
+		    except OSError, e:
+			raise ZEBUError("Cannot obtain ZFS snapshot list")
+		    if po.returncode != 0:
+			raise ZEBUError("Error deleting snapshot " + snapname)
+		    deleted.append(snapname)
 	if len(deleted) > 0:
 	    return deleted
 	else:

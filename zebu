@@ -250,9 +250,10 @@ class ZFSfs:
 	threshold = int(time.strftime("%Y%m%d%H%M%S", self.expiretime))
 	deleted = []
 	# Under no circumstances should we ever delete the last snapshot.
-	if len(self.snapshots) > 1:
+	limit = len(self.snapshots) - 1
+	if limit > 0:
 	    for snap in self.snapshots:
-		if int(snap) < threshold:
+		if int(snap) < threshold and len(deleted) < limit:
 		    snapname = self.name + '@' + self.snap_prefix + snap
 		    try:
 			if self.recurse:

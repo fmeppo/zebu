@@ -82,6 +82,11 @@ considered old if they are have aged more than \fIexpiretime\fR.
 .I <days>:<hours>:<minutes>:<seconds>
 .\"
 .TP
+\fBsnap_prefix\fR
+ZFS snapshots will be created with names beginning with \fBsnap_prefix\fR.
+This defaults to "zebu-".
+.\"
+.TP
 \fBrecurse\fR
 If set to \fIyes\fR (or \fItrue\fR, or \fI1\fR), \fBzebu\fR will create
 and delete snapshots recursively on a given ZFS file system.  This option is

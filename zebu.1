@@ -77,10 +77,13 @@ removing the last remaining viable backup (particularly important for
 \fB\-h\fR, \fB\-\-help\fR
 Show a summary of options and commands, then exit.
 .TP
-\fB\-f\fR, \fB\-\-file\fR \fIconfig-file\fI
+\fB\-f\fR, \fB\-\-file\fR \fIconfig-file\fR
 Use
 .I config-file
 as a configuration file.
+.TP
+\fB\-F\fR, \fB\-\-filesystem\fR \fIfilesystem\fR
+Only operate on the named ZFS file system.
 .TP
 \fB\-v\fR, \fB\-\-verbose\fR
 Be a bit more verbose, and provide status messages during a run.
@@ -90,6 +93,9 @@ Skip the snapshot phase, and continue to the next phase.
 .TP
 \fB\-c\fR, \fB\-\-no-cleanup\fR
 Skip the cleanup phase, and continue to the next phase.
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version information and exit.
 .SH CONFIGURATION FILE
 More on this later.
 .SS subsection

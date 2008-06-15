@@ -469,8 +469,14 @@ def usage():
     print "-h, --help		Print a usage summary"
     print "-f, --config <file>	Use config file at <file>"
     print "-v, --verbose		Be rather verbose"
-    print "-s, --no-snapshot		Skip the snapshot phase"
-    print "-c, --no-cleanup		Skip the cleanup phase"
+    print "-s, --no-snapshot	Skip the snapshot phase"
+    print "-c, --no-cleanup	Skip the cleanup phase"
+    print "-F, --filesystem <fs>	Only operate on the named filesystem"
+    print "-V, --version		Print version information"
+
+
+def version():
+    print "zebu version 0.5, copyight Mike Shuey (<shuey@fmepnet.org>), 2008"
 
 
 def main():
@@ -484,7 +490,7 @@ def main():
 
     # Collect command-line args
     try:
-	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iV:vsc", ["help","config=","init","vault=","verbose","no-snapshot","no-cleanup"] )
+	opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iF:vscV", ["help","config=","init","filesystem=","verbose","no-snapshot","no-cleanup","version"] )
     except getopt.GetoptError:
 	print "Invalid option found."
 	usage()
@@ -499,7 +505,7 @@ def main():
 	    ConfigFile = a
 	elif o in ("-i", "--init"):
 	    InitMode = True
-	elif o in ("-V", "--vault"):
+	elif o in ("-F", "--filesystem"):
 	    SingleShotVault = a
 	elif o in ("-v", "--verbose"):
 	    Verbose = True
@@ -507,6 +513,9 @@ def main():
 	    DoSnapshot = False
 	elif o in ("-c", "--no-cleanup"):
 	    DoCleanup = False
+	elif o in ("-V", "--version"):
+	    version()
+	    sys.exit(0)
 
     # Load the configuration
     try:

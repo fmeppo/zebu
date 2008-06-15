@@ -466,12 +466,12 @@ class ZEBUVault(ZFSfs):
 def usage():
     print "zebu [options]"
     print
-    print "-h, --help		Print a usage summary"
-    print "-f, --config <file>	Use config file at <file>"
-    print "-v, --verbose		Be rather verbose"
-    print "-s, --no-snapshot	Skip the snapshot phase"
     print "-c, --no-cleanup	Skip the cleanup phase"
+    print "-f, --config <file>	Use config file at <file>"
     print "-F, --filesystem <fs>	Only operate on the named filesystem"
+    print "-h, --help		Print a usage summary"
+    print "-s, --no-snapshot	Skip the snapshot phase"
+    print "-v, --verbose		Be rather verbose"
     print "-V, --version		Print version information"
 
 

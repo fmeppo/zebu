@@ -74,8 +74,8 @@ removing the last remaining viable backup (particularly important for
 \fBrsync\fR-based backup file systems).
 .SH OPTIONS
 .TP
-\fB\-h\fR, \fB\-\-help\fR
-Show a summary of options and commands, then exit.
+\fB\-c\fR, \fB\-\-no-cleanup\fR
+Skip the cleanup phase, and continue to the next phase.
 .TP
 \fB\-f\fR, \fB\-\-file\fR \fIconfig-file\fR
 Use
@@ -85,14 +85,14 @@ as a configuration file.
 \fB\-F\fR, \fB\-\-filesystem\fR \fIfilesystem\fR
 Only operate on the named ZFS file system.
 .TP
-\fB\-v\fR, \fB\-\-verbose\fR
-Be a bit more verbose, and provide status messages during a run.
+\fB\-h\fR, \fB\-\-help\fR
+Show a summary of options and commands, then exit.
 .TP
 \fB\-s\fR, \fB\-\-no-snapshot\fR
 Skip the snapshot phase, and continue to the next phase.
 .TP
-\fB\-c\fR, \fB\-\-no-cleanup\fR
-Skip the cleanup phase, and continue to the next phase.
+\fB\-v\fR, \fB\-\-verbose\fR
+Be a bit more verbose, and provide status messages during a run.
 .TP
 \fB\-V\fR, \fB\-\-version\fR
 Print version information and exit.

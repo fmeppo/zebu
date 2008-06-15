@@ -3,7 +3,7 @@
 
 PREFIX=	/usr/local
 PAGES=	zebu.1.gz zebu.conf.5.gz
-INSTFLAGS= -o root -g wheel -b
+INSTFLAGS= -o root -g wheel
 
 all: man
 
@@ -19,6 +19,6 @@ zebu.conf.5.gz: zebu.1
 	gzip -9 -c zebu.conf.5 > zebu.conf.5.gz
 
 install: all
-	install -m 0444 $(INSTFLAGS) zebu.1.gz $(PREFIX)/man/man1
-	install -m 0444 $(INSTFLAGS) zebu.conf.5.gz $(PREFIX)/man/man5
-	install -m 0555 $(INSTFLAGS) zebu $(PREFIX)/sbin
+	install -m 0644 $(INSTFLAGS) zebu.1.gz $(PREFIX)/man/man1
+	install -m 0644 $(INSTFLAGS) zebu.conf.5.gz $(PREFIX)/man/man5
+	install -m 0755 $(INSTFLAGS) zebu $(PREFIX)/sbin

@@ -359,7 +359,7 @@ class ZEBUVault(ZFSfs):
 	    20 : [ 'error',       "status returned when sent SIGUSR1, SIGINT" ],
 	    21 : [ 'error',       "some error returned by waitpid()" ],
 	    22 : [ 'error',       "error allocating core memory buffers" ],
-	    23 : [ 'error',       "partial transfer" ],
+	    23 : [ 'warning',     "partial transfer" ],
 	    24 : [ 'warning',     "file vanished on sender" ],
 
 	    30 : [ 'error',       "timeout in data send/receive" ],

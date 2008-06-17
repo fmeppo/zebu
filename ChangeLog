@@ -1,6 +1,7 @@
 0.5.1:
     Make partial rsync transfers a warning, not an error, so busy files on
 	MacOSX won't cause a backup to miss a snapshot.
+    Added ChangeLog.
 
 0.5:
     Initial release.

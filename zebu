@@ -549,7 +549,7 @@ def main():
 		snap = vault.snapshot()
 		if snap == False and Verbose:
 		    print vname + ": snapshot failed"
-		else:
+		elif Verbose:
 		    print "Created snapshot " + snap
 	    except ZEBUError, e:
 		print str(e)

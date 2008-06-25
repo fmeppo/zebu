@@ -1,3 +1,6 @@
+0.5.2:
+    Only print success messages if --verbose.
+
 0.5.1:
     Make partial rsync transfers a warning, not an error, so busy files on
 	MacOSX won't cause a backup to miss a snapshot.

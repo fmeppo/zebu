@@ -120,6 +120,18 @@ class ZEBUConfig:
 	else:
 	    raise ZEBUValueError("Required option \"" + option + "\" not set.")
 
+    # Get a boolean option, and return a python True or False.
+    # Invalid values in the config file will raise an error.
+    def getBoolOption(self, vault, option):
+	value = self.config.get(vault, option)
+	if value in ['yes','Yes','true','True','1','y']:
+	    return True
+	elif value in ['no','No','false','False','0','n']:
+	    return False
+	else:
+	    raise ZEBUValueError("Malformed value for boolean option \"" \
+				    + option + "\": " + value)
+
     def hasVault(self, vault):
 	if vault in self.getVaultNames():
 	    return True
@@ -160,11 +172,7 @@ class ZFSfs:
 	return out.splitlines()[1]
 
     def __getRecursion__(self):
-	r = self.config.getOption(self.name, "recurse")
-	if r in ['yes','Yes','true','True','1','y']:
-	    return True
-	else:
-	    return False
+	return self.config.getBoolOption(self.name, "recurse")
 
     def __getExpiretime__(self):
 	r = self.config.getOption(self.name, "expiretime")
@@ -310,12 +318,12 @@ class ZEBUVault(ZFSfs):
 		    doc="remote directory for rsync")
 
     doSnapshot = property(fget=lambda self:
-			self.config.getOption(self.name, "doSnapshot"),
+			self.config.getBoolOption(self.name, "doSnapshot"),
 		    fset=None, fdel=None,
 		    doc="True/False: perform snapshots on target vault")
 
     doCleanup = property(fget=lambda self:
-			self.config.getOption(self.name, "doCleanup"),
+			self.config.getBoolOption(self.name, "doCleanup"),
 		    fset=None, fdel=None,
 		    doc="True/False: perform snapshot cleanup on target vault")
 

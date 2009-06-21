@@ -61,6 +61,24 @@ This is the base path for the remote end of \fBrsync\fR-based backups.
 silently ignored for conventional ZFS file systems.
 .\"
 .TP
+\fBdoCleanup\fR
+This boolean indicates whether zebu should bother running the cleanup
+(snapshot-deleting) phase on a particular vault.  If False, the cleanup
+phase is skipped; if True, cleanup is performed.  This is also valid in the
+.I DEFAULT
+section.
+
+The default value is True.
+.TP
+\fBdoSnapshot\fR
+This boolean indicates whether zebu should perform the snapshot creation
+phase on a particular vault.  If True, snapshots are performed; if False,
+snapshots will not be made.  This is also valid in the
+.I DEFAULT
+section.
+
+The default value is True.
+.TP
 \fBexcludes\fR
 Path to a file containing \fBrsync\fR excludes.  This contents of this file
 are passed to the

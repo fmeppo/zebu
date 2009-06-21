@@ -91,7 +91,9 @@ class ZEBUConfig:
 			 'rsync_path': 'rsync',
 			 'zfs_path': '/sbin/zfs',
 			 'recurse': 'no',
-			 'snap_prefix': 'zebu-'
+			 'snap_prefix': 'zebu-',
+			 'doSnapshot': True,
+			 'doCleanup': True
 			}
 
 	config = ConfigParser.SafeConfigParser(self.defaults)
@@ -306,6 +308,16 @@ class ZEBUVault(ZFSfs):
 			self.config.getOption(self.name, "basepath"),
 		    fset=None, fdel=None,
 		    doc="remote directory for rsync")
+
+    doSnapshot = property(fget=lambda self:
+			self.config.getOption(self.name, "doSnapshot"),
+		    fset=None, fdel=None,
+		    doc="True/False: perform snapshots on target vault")
+
+    doCleanup = property(fget=lambda self:
+			self.config.getOption(self.name, "doCleanup"),
+		    fset=None, fdel=None,
+		    doc="True/False: perform snapshot cleanup on target vault")
 
     def snapshot(self):
 	"""

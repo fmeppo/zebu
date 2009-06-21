@@ -556,7 +556,7 @@ def main():
 	#
 	# Run snapshot phase
 	#
-	if DoSnapshot:
+	if DoSnapshot and vault.doSnapshot == True:
 	    try:
 		snap = vault.snapshot()
 		if snap == False and Verbose:
@@ -571,7 +571,7 @@ def main():
 	#
 	# Run cleanup phase
 	#
-	if DoCleanup:
+	if DoCleanup and vault.doCleanup == True:
 	    try:
 		clean = vault.cleanup()
 		if clean == False and Verbose:

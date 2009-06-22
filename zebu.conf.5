@@ -79,6 +79,15 @@ section.
 
 The default value is True.
 .TP
+.TP
+\fBdoTransmit\fR
+This boolean indicates whether zebu should attempt to transmit snapshots
+from the indicated vault.  If True, snapshots are transmitted; if False,
+this step is skipped.  This is also valid in the
+.I DEFAULT
+section.
+
+The default value is False.
 \fBexcludes\fR
 Path to a file containing \fBrsync\fR excludes.  This contents of this file
 are passed to the

@@ -93,7 +93,7 @@ class ZEBUConfig:
 			 'recurse': 'no',
 			 'snap_prefix': 'zebu-',
 			 'doSnapshot': True,
-			 'doCleanup': True
+			 'doCleanup': True,
 			 'doTransmit': False
 			}
 
@@ -281,6 +281,12 @@ class ZFSfs:
 	    return deleted
 	else:
 	    return None
+
+    def transmit(self):
+	"""
+	Transmit latest snapshots to a backup server.
+	"""
+	pass
 
 
 class ZEBUVault(ZFSfs):
@@ -604,6 +610,26 @@ def main():
 
 	if Verbose:
 	    print "Completed vault: " + vname
+
+    #
+    # Run transmit phase
+    #
+    for vname in vaults:
+	if Verbose:
+	    print "Selecting vault: " + vname
+	try:
+	    vault = config.getVault(vname)
+	except ZEBUError, e:
+	    print str(e)
+	    continue
+
+	if DoTransmit and vault.doTransmit == True:
+	    try:
+		xmit = vault.transmit()
+		if xmit == False and Verbose:
+		    print vname + ": failed to transmit"
+	    except ZEBUError, e:
+		print str(e)
 
 
 if __name__ == "__main__":

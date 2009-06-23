@@ -1,3 +1,9 @@
+1.0.0:
+    Allow snapshot and cleanup phases to be skipped on a per-vault basis.
+
+    New major feature: Vaults can transmit their recent snapshots to a
+    backup server.
+
 0.5.2:
     Only print success messages if --verbose.
 

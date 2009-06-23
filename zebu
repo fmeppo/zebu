@@ -568,73 +568,80 @@ def main():
     else:
 	vaults = config.getVaultNames()
 
-    for vname in vaults:
+    if DoSnapshot == False and DoCleanup == False:
 	if Verbose:
-	    print "Selecting vault: " + vname
-	try:
-	    vault = config.getVault(vname)
-	except ZEBUError, e:
-	    print str(e)
-	    continue
-
-	#
-	# Run snapshot phase
-	#
-	if DoSnapshot and vault.doSnapshot == True:
+	    print "Skipping all snapshot and cleanup phases."
+    else:
+	for vname in vaults:
+	    if Verbose:
+		print "Selecting vault: " + vname
 	    try:
-		snap = vault.snapshot()
-		if snap == False and Verbose:
-		    print vname + ": snapshot failed"
-		elif Verbose:
-		    print "Created snapshot " + snap
+		vault = config.getVault(vname)
 	    except ZEBUError, e:
 		print str(e)
-	elif Verbose:
-	    print vname + ": skipping snapshot"
+		continue
 
-	#
-	# Run cleanup phase
-	#
-	if DoCleanup and vault.doCleanup == True:
-	    try:
-		clean = vault.cleanup()
-		if clean == False and Verbose:
-		    print vname + ": cleanup failed"
-		elif clean != None and Verbose:
-		    for snap in clean:
-			print vname + ": deleted snapshot " + snap
-	    except ZEBUError, e:
-		print str(e)
-	elif Verbose:
-	    print vname + ": skipping cleanup"
+	    #
+	    # Run snapshot phase
+	    #
+	    if DoSnapshot and vault.doSnapshot == True:
+		try:
+		    snap = vault.snapshot()
+		    if snap == False and Verbose:
+			print vname + ": snapshot failed"
+		    elif Verbose:
+			print "Created snapshot " + snap
+		except ZEBUError, e:
+		    print str(e)
+	    elif Verbose:
+		print vname + ": skipping snapshot"
 
-	if Verbose:
-	    print "Completed vault: " + vname
+	    #
+	    # Run cleanup phase
+	    #
+	    if DoCleanup and vault.doCleanup == True:
+		try:
+		    clean = vault.cleanup()
+		    if clean == False and Verbose:
+			print vname + ": cleanup failed"
+		    elif clean != None and Verbose:
+			for snap in clean:
+			    print vname + ": deleted snapshot " + snap
+		except ZEBUError, e:
+		    print str(e)
+	    elif Verbose:
+		print vname + ": skipping cleanup"
+
+	    if Verbose:
+		print "Completed vault: " + vname
 
     #
     # Run transmit phase
     #
     for vname in vaults:
 	if Verbose:
-	    print "Selecting vault: " + vname
+	    print "Selecting source vault: " + vname
 	try:
 	    vault = config.getVault(vname)
 	except ZEBUError, e:
 	    print str(e)
 	    continue
 
-	if DoTransmit and vault.doTransmit == True:
-	    try:
-		xmit = vault.transmit()
-		if xmit == False and Verbose:
-		    print vname + ": failed to transmit"
-	    except ZEBUError, e:
-		print str(e)
+	try:
+	    if DoTransmit and vault.doTransmit == True:
+		try:
+		    xmit = vault.transmit()
+		    if xmit == False and Verbose:
+			print vname + ": failed to transmit"
+		except ZEBUError, e:
+		    print str(e)
 
-	    if Verbose:
-		print "Completed transmit of vault: " + vname
-	elif Verbose:
-	    print vname + ": skipping transmit"
+		if Verbose:
+		    print "Completed transmit of vault: " + vname
+	    elif Verbose:
+		print vname + ": skipping transmit"
+	except ZEBUError, e:
+	    print vname + ", error during transmit: " + str(e)
 
 
 if __name__ == "__main__":

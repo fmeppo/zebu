@@ -286,7 +286,7 @@ class ZFSfs:
 	"""
 	Transmit latest snapshots to a backup server.
 	"""
-	pass
+	print "transmit: " + self.name
 
 
 class ZEBUVault(ZFSfs):
@@ -632,7 +632,7 @@ def main():
 		print str(e)
 
 	    if Verbose:
-		print Completed transmit of vault: " + vname
+		print "Completed transmit of vault: " + vname
 	elif Verbose:
 	    print vname + ": skipping transmit"
 

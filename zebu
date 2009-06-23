@@ -216,6 +216,21 @@ class ZFSfs:
 			self.config.getOption(self.name, "zfs_path"),
 		    fset=None, fdel=None, doc="path to zfs binary")
 
+    doSnapshot = property(fget=lambda self:
+			self.config.getBoolOption(self.name, "doSnapshot"),
+		    fset=None, fdel=None,
+		    doc="True/False: perform snapshots on target vault")
+
+    doCleanup = property(fget=lambda self:
+			self.config.getBoolOption(self.name, "doCleanup"),
+		    fset=None, fdel=None,
+		    doc="True/False: perform snapshot cleanup on target vault")
+
+    doTransmit = property(fget=lambda self:
+			self.config.getBoolOption(self.name, "doTransmit"),
+		    fset=None, fdel=None,
+		    doc="True/False: transmit snapshots from target vault")
+
     def snapshot(self):
 	"""
 	Snapshot a ZFS filesystem.
@@ -323,21 +338,6 @@ class ZEBUVault(ZFSfs):
 			self.config.getOption(self.name, "basepath"),
 		    fset=None, fdel=None,
 		    doc="remote directory for rsync")
-
-    doSnapshot = property(fget=lambda self:
-			self.config.getBoolOption(self.name, "doSnapshot"),
-		    fset=None, fdel=None,
-		    doc="True/False: perform snapshots on target vault")
-
-    doCleanup = property(fget=lambda self:
-			self.config.getBoolOption(self.name, "doCleanup"),
-		    fset=None, fdel=None,
-		    doc="True/False: perform snapshot cleanup on target vault")
-
-    doTransmit = property(fget=lambda self:
-			self.config.getBoolOption(self.name, "doTransmit"),
-		    fset=None, fdel=None,
-		    doc="True/False: transmit snapshots from target vault")
 
     def snapshot(self):
 	"""

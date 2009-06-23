@@ -92,9 +92,9 @@ class ZEBUConfig:
 			 'zfs_path': '/sbin/zfs',
 			 'recurse': 'no',
 			 'snap_prefix': 'zebu-',
-			 'doSnapshot': True,
-			 'doCleanup': True,
-			 'doTransmit': False
+			 'doSnapshot': 'True',
+			 'doCleanup': 'True',
+			 'doTransmit': 'False'
 			}
 
 	config = ConfigParser.SafeConfigParser(self.defaults)
@@ -125,13 +125,13 @@ class ZEBUConfig:
     # Invalid values in the config file will raise an error.
     def getBoolOption(self, vault, option):
 	value = self.config.get(vault, option)
-	if value in ['yes','Yes','true','True','1','y']:
+	if value in ['yes','Yes','true','True','1','y',True]:
 	    return True
-	elif value in ['no','No','false','False','0','n']:
+	elif value in ['no','No','false','False','0','n',False]:
 	    return False
 	else:
 	    raise ZEBUValueError("Malformed value for boolean option \"" \
-				    + option + "\": " + value)
+				    + option + "\": " + str(value))
 
     def hasVault(self, vault):
 	if vault in self.getVaultNames():

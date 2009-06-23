@@ -631,6 +631,11 @@ def main():
 	    except ZEBUError, e:
 		print str(e)
 
+	    if Verbose:
+		print Completed transmit of vault: " + vname
+	elif Verbose:
+	    print vname + ": skipping transmit"
+
 
 if __name__ == "__main__":
     main()

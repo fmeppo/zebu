@@ -408,6 +408,14 @@ class ZFSfs:
         for cmd in send_cmds:
             if cmd[0] != None:
                 print "SEND: " + str(cmd[0])
+                try:
+                    p1 = Popen(cmd[0], stdout=PIPE)
+                    p2 = Popen(self.transmit_cmd.split(), stdin=p1.stdout, stdout=PIPE)
+                    out = p1.communicate()[0]
+                    retval = p1.returncode
+                except OSError, e:
+                    raise ZEBUError("Transmission problem on " + self.name + ": " + str(e))
+                print "retval: " + str(retval)
             if cmd[1] != None:
                 try:
                     fd = open(status_file, 'a')

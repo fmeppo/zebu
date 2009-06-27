@@ -155,6 +155,7 @@ class ZFSfs:
 	self.config = config
 	self.__buildSnapshots__()
 	self.expiretime = self.__getExpiretime__()
+        self.__filesystems__ = None
 
     def getZFSProperty(self, prop):
 	"""
@@ -231,11 +232,18 @@ class ZFSfs:
 		    fset=None, fdel=None,
 		    doc="True/False: transmit snapshots from target vault")
 
-    def snapname(self, snaptime):
+    filesystems = property(fget=lambda self:
+                    self.__buildFilesystems__(), fset=None, fdel=None,
+                    doc="List of filesystems (including children) under with this path.")
+
+    def snapname(self, snaptime, fsname=None):
         """
         This builds a snapshot name based on the given snapshot time.
         """
-        return self.name + '@' + self.snap_prefix + snaptime
+        if fsname == None:
+            return self.name + '@' + self.snap_prefix + snaptime
+        else:
+            return fsname + '@' + self.snap_prefix + snaptime
 
     def snapshot(self):
 	"""
@@ -275,6 +283,28 @@ class ZFSfs:
 	    if line.startswith(prefix):
 		self.snapshots.append(line.split(prefix)[1])
 
+    def __buildFilesystems__(self):
+        """
+        Builds the internal list of child filesystems.  Call again to rebuild.
+        """
+        if self.__filesystems__ != None:
+            return self.__filesystems__
+
+        self.__filesystems__ = []
+        try:
+            po = Popen([self.zfs_path, 'list', '-r', '-H', '-t', 'filesystem', self.name],
+                       stdout=PIPE, stderr=PIPE)
+        except OSError, e:
+            raise ZEBUError("Cannot obtain ZFS filesystem list")
+
+        out = po.communicate()[0].splitlines()
+        if po.returncode != 0:
+            raise ZEBUError("Problem obtaining ZFS filesystem list")
+        for line in out:
+            self.__filesystems__.append(line.split()[0])
+
+        return self.__filesystems__
+
     def cleanup(self):
 	"""
 	Delete expired snapshots.
@@ -311,7 +341,6 @@ class ZFSfs:
 
         status_file = self.path + "/.zebu_status"
         print "status_file: " + status_file
-        s = os.stat(status_file)
         try:
             s = os.stat(status_file)
             mode = "incr"
@@ -340,14 +369,26 @@ class ZFSfs:
             send_cmds = []
             while idx < len(self.snapshots):
                 if idx != (len(self.snapshots) - 1):
-                    send_cmds.append(self.zfs_path + ' send -i ' + \
+                    if self.recurse:
+                        for fs in self.filesystems:
+                            send_cmds.append(self.zfs_path + ' send -i ' + \
+                                        self.snapname(self.snapshots[idx], fs) + ' ' + \
+                                        self.snapname(self.snapshots[idx + 1], fs) )
+                    else:
+                        send_cmds.append(self.zfs_path + ' send -i ' + \
                                         self.snapname(self.snapshots[idx]) + ' ' + \
                                         self.snapname(self.snapshots[idx + 1]) )
                 idx = idx + 1
         except OSError:
             # status file is missing
             mode = "full"
-            send_cmds = [self.zfs_path + ' send ' + self.snapname(self.snapshots[-1])]
+            if self.recurse:
+                send_cmds = []
+                for fs in self.filesystems:
+                    send_cmds.append(self.zfs_path + ' send ' + \
+                            self.snapname(self.snapshots[-1], fs) )
+            else:
+                send_cmds = [self.zfs_path + ' send ' + self.snapname(self.snapshots[-1])]
 
         print "mode: " + mode
         for cmd in send_cmds:

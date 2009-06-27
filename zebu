@@ -365,19 +365,22 @@ class ZFSfs:
                 raise ZEBUError("Last transmitted snapshot for " + self.name + " (" + \
                                 str(xmit_snapshots[-1]) + ") no longer exists")
 
-            # Gather the list of incremental send commands
+            # Gather the list of incremental send commands.  Send commands are tuples;
+            # the first element is a command to send, and the second is a snapshot name
+            # to record in the status file.  If either are None, that action is skipped.
             send_cmds = []
             while idx < len(self.snapshots):
                 if idx != (len(self.snapshots) - 1):
                     if self.recurse:
                         for fs in self.filesystems:
-                            send_cmds.append(self.zfs_path + ' send -i ' + \
+                            send_cmds.append((self.zfs_path + ' send -i ' + \
                                         self.snapname(self.snapshots[idx], fs) + ' ' + \
-                                        self.snapname(self.snapshots[idx + 1], fs) )
+                                        self.snapname(self.snapshots[idx + 1], fs), None))
                     else:
                         send_cmds.append(self.zfs_path + ' send -i ' + \
                                         self.snapname(self.snapshots[idx]) + ' ' + \
                                         self.snapname(self.snapshots[idx + 1]) )
+                    send_cmds.append((None, self.snapshots[idx + 1]))
                 idx = idx + 1
         except OSError:
             # status file is missing
@@ -385,14 +388,26 @@ class ZFSfs:
             if self.recurse:
                 send_cmds = []
                 for fs in self.filesystems:
-                    send_cmds.append(self.zfs_path + ' send ' + \
-                            self.snapname(self.snapshots[-1], fs) )
+                    send_cmds.append((self.zfs_path + ' send ' + \
+                            self.snapname(self.snapshots[-1], fs), None) )
+                send_cmds.append((None, self.snapshots[-1]))
             else:
-                send_cmds = [self.zfs_path + ' send ' + self.snapname(self.snapshots[-1])]
+                send_cmds = [(self.zfs_path + ' send ' + self.snapname(self.snapshots[-1]), \
+                                self.snapshots[-1])]
 
         print "mode: " + mode
+
+        # Perform commands n'things
         for cmd in send_cmds:
-            print "send_cmd: " + cmd
+            if cmd[0] != None:
+                print "SEND: " + cmd[0]
+            if cmd[1] != None:
+                try:
+                    fd = open(status_file, 'a')
+                    fd.write(cmd[1] + '\n')
+                    fd.close()
+                except OSError:
+                    raise ZEBUError("Could not append to status file " + status_file)
 
 
 class ZEBUVault(ZFSfs):

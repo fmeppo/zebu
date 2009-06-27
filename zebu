@@ -303,6 +303,16 @@ class ZFSfs:
 	"""
 	print "transmit: " + self.name
 
+        status_file = self.path + "/.zebu_status"
+        try:
+            s = os.stat(status_file)
+            mode = "incr"
+        except:
+            # status file is missing
+            mode = "full"
+
+        print "mode: " + mode
+
 
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):

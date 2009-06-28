@@ -405,23 +405,35 @@ class ZFSfs:
         print "mode: " + mode
 
         # Perform commands n'things
+        # retval is the return value from the transmission.  Since recursive transmits
+        # need to be tracked as one entity (we aren't storing status files for each child
+        # FS, just the parent), we need to keep a running sense of the return value that
+        # may span several actual transmits.  As usual, 0 indicates success.
+        retval = 0
         for cmd in send_cmds:
             if cmd[0] != None:
                 print "SEND: " + str(cmd[0])
                 try:
                     p = Popen(cmd[0] + "|" + self.transmit_cmd, shell=True)
-                    retval = p.returncode
+                    sts = os.waitpid(p.pid, 0)
                     print "RECV: " + str(self.transmit_cmd)
                 except OSError, e:
                     raise ZEBUError("Transmission problem on " + self.name + ": " + str(e))
+                if retval == 0:
+                    retval = sts[1]
                 print "retval: " + str(retval)
-            if cmd[1] != None and False:
-                try:
-                    fd = open(status_file, 'a')
-                    fd.write(cmd[1] + '\n')
-                    fd.close()
-                except OSError:
-                    raise ZEBUError("Could not append to status file " + status_file)
+            if cmd[1] != None:
+                if retval == 0:
+                    try:
+                        fd = open(status_file, 'a')
+                        fd.write(cmd[1] + '\n')
+                        fd.close()
+                    except OSError:
+                        raise ZEBUError("Could not append to status file " + status_file)
+                else:
+                    raise ZEBUError("Transmission did not fully complete for " + \
+                                    self.name + \
+                                    " - vault may be inconsistent with backup server.")
 
 
 class ZEBUVault(ZFSfs):

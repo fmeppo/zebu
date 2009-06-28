@@ -757,11 +757,7 @@ def main():
 	try:
 	    if DoTransmit and vault.doTransmit == True:
 		try:
-		    xmit = vault.transmit()
-		    if xmit == False and Verbose:
-			print vname + ": failed to transmit"
-
-                    # FIXME: should be if xmit = True
+		    vault.transmit()
                     if Verbose:
                         print "Completed transmit of vault: " + vname
 		except ZEBUError, e:

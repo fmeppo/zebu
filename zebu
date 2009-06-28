@@ -342,10 +342,9 @@ class ZFSfs:
 	"""
 	Transmit latest snapshots to a backup server.
 	"""
-	print "transmit: " + self.name
 
         status_file = self.path + "/.zebu_status"
-        print "status_file: " + status_file
+
         try:
             s = os.stat(status_file)
             mode = "incr"
@@ -747,7 +746,7 @@ def main():
     #
     for vname in vaults:
 	if Verbose:
-	    print "Selecting source vault: " + vname
+	    print "Selecting source vault for transmit: " + vname
 	try:
 	    vault = config.getVault(vname)
 	except ZEBUError, e:

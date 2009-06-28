@@ -72,6 +72,60 @@ will never attempt to delete snapshots if only one snapshot is remaining.
 This is intended to preserve at least one good snapshot, to avoid potentially
 removing the last remaining viable backup (particularly important for
 \fBrsync\fR-based backup file systems).
+.SS Transmit
+As a final step,
+.BR Zebu
+will attempt to transfer snapshots using
+.BR "zfs send"
+and the \fItransmit_cmd\fP defined in the configuration file.  No vaults will be
+transmitted until all vaults have been through a snapshot and cleanup phase (if
+applicable) - vault transmission must always be the final step.
+.PP
+.BR Zebu
+relies on
+.BR "zfs send"
+to create a stream to send to the configured \fItransmit_cmd\fP.  The first time a
+vault is sent,
+.BR zebu
+will send a full copy of the latest snapshot.  All subsequent transmissions will be done
+using incremental sends;
+.BR zebu
+will find the last snapshot that was successfully transmitted, and send a series of
+incremental snapshots until all available
+.BR zebu
+snapshots have been transmitted.
+.PP
+The list of successfully transmitted snapshots for a
+vault is kept in a status file, named \fI.zebu_status\fP, in the root of each
+transmitted vault.  If this status file is deleted,
+.BR zebu
+will assume no valid snapshots have been transmitted and will transmit the most
+recent snapshot at the next opportunity.
+.PP
+Recursive vaults (ZFS filesystems with children, configured to be recursively
+snapshotted) will be recursively transmitted.  Status information is only kept for
+the root of the recursive vault, so transfers of child filesystems must all be
+successful for
+.BR zebu
+to record a successful transfer and move on to the next incremental.  While failed
+transfers will be attempted again on the next run (and may eventually work themselves
+out, if
+.BR zebu
+is able to move enough snapshots from the failed run for later incremental transfers
+to succeed), it is possible for the server and the recipient to get out of sync and
+require manual intervention.  This is particularly likely if transfers take an
+exceptionally long time (either due to a slow transmission medium or a large amount of
+data to send) and the cleanup phase removes the necessary source snapshots before they
+can be sent as an incremental transmission.  Take care to configure expire times
+accordingly.
+.PP
+The use of the \fB-F\fR option with
+.BR "zfs recv"
+is recommended for recursive vaults being sent to another live ZFS filesystem.  To pipe
+snapshots over
+.BR ssh
+to another backup server, the author uses a \fItransmit_cmd\fP like this:
+.BR "/usr/bin/ssh -x -qT -l root backup.example.com /sbin/zfs recv -F -d pool"
 .SH OPTIONS
 .TP
 \fB\-c\fR, \fB\-\-no-cleanup\fR
@@ -112,5 +166,7 @@ zebu.conf(5)
 \fBzebu\fR was written by Mike Shuey <shuey@fmepnet.org> and is licensed under
 the terms of the GNU Public License, version 2 or higher.
 .SH "KNOWN ISSUES"
-.B zebu
-does not assist in making offsite backups of any managed ZFS file systems.
+It would be good to have a lock file for use during the transmit phase.  That way,
+multiple
+.BR zebu
+runs can safely take place during particularly slow transfers.

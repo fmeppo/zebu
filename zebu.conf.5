@@ -138,6 +138,12 @@ copy of another machine.  If no \fBrsync_server\fR is specified, the file
 system is assumed to be a normal ZFS file system.
 .\"
 .TP
+\fBtransmit_cmd\fR
+This is a shell command that should transmit and store your ZFS snapshots.  The output
+of \fBzfs send\fR will be piped into this shell command, so ideally it should be something
+that will send \fBstdin\fR to a remote server and either archive it or play it back on
+another ZFS pool.
+.TP
 \fBzfs_path\fR
 Path to the 
 .BR zfs

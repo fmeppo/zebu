@@ -402,8 +402,6 @@ class ZFSfs:
                 send_cmds = [(self.zfs_path + ' send ' + self.snapname(self.snapshots[-1]), \
                                 self.snapshots[-1])]
 
-        print "mode: " + mode
-
         # Perform commands n'things
         # retval is the return value from the transmission.  Since recursive transmits
         # need to be tracked as one entity (we aren't storing status files for each child
@@ -412,16 +410,13 @@ class ZFSfs:
         retval = 0
         for cmd in send_cmds:
             if cmd[0] != None:
-                print "SEND: " + str(cmd[0])
                 try:
                     p = Popen(cmd[0] + "|" + self.transmit_cmd, shell=True)
                     sts = os.waitpid(p.pid, 0)
-                    print "RECV: " + str(self.transmit_cmd)
                 except OSError, e:
                     raise ZEBUError("Transmission problem on " + self.name + ": " + str(e))
                 if retval == 0:
                     retval = sts[1]
-                print "retval: " + str(retval)
             if cmd[1] != None:
                 if retval == 0:
                     try:

@@ -75,7 +75,9 @@ removing the last remaining viable backup (particularly important for
 .SH OPTIONS
 .TP
 \fB\-c\fR, \fB\-\-no-cleanup\fR
-Skip the cleanup phase, and continue to the next phase.
+Skip the cleanup phase, and continue to the next phase.  All cleanup phases will be
+skipped (for all vaults), regardless of the setting of the \fBdoCleanup\fR key in the
+config file.
 .TP
 \fB\-f\fR, \fB\-\-file\fR \fIconfig-file\fR
 Use
@@ -89,7 +91,14 @@ Only operate on the named ZFS file system.
 Show a summary of options and commands, then exit.
 .TP
 \fB\-s\fR, \fB\-\-no-snapshot\fR
-Skip the snapshot phase, and continue to the next phase.
+Skip the snapshot phase, and continue to the next phase.  All snapshot phases will be
+skipped (for all vaults), regardless of the setting of the \fBdoSnapshot\fR key in the
+config file.
+.TP
+\fB\-t\fR, \fB\-\-no-transmit\fR
+Skip the transmit phase.  All transmit phases will be
+skipped (for all vaults), regardless of the setting of the \fBdoTransmit\fR key in the
+config file.
 .TP
 \fB\-v\fR, \fB\-\-verbose\fR
 Be a bit more verbose, and provide status messages during a run.

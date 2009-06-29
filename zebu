@@ -338,9 +338,10 @@ class ZFSfs:
 	else:
 	    return None
 
-    def transmit(self):
+    def transmit(self, Verbose=False):
 	"""
-	Transmit latest snapshots to a backup server.
+	Transmit latest snapshots to a backup server.  Takes a single argument, Verbose,
+        a bool to indicate whether we're running in verbose mode or not.
 	"""
 
         status_file = self.path + "/.zebu_status"
@@ -348,6 +349,8 @@ class ZFSfs:
         try:
             s = os.stat(status_file)
             mode = "incr"
+            if Verbose:
+                print "  xmit (incremental): " + self.name
 
             # Build list of sent snapshots
             xmit_snapshots = []
@@ -391,6 +394,8 @@ class ZFSfs:
         except OSError:
             # status file is missing
             mode = "full"
+            if Verbose:
+                print "  xmit (full): " + self.name
             if self.recurse:
                 send_cmds = []
                 for fs in self.filesystems:
@@ -411,7 +416,11 @@ class ZFSfs:
             if cmd[0] != None:
                 try:
                     p = Popen(cmd[0] + "|" + self.transmit_cmd, shell=True)
+                    if Verbose:
+                        print "    command: " + cmd[0] + " | " + self.transmit_cmd
                     sts = os.waitpid(p.pid, 0)
+                    if Verbose:
+                        print "        return value: " + str(sts[1])
                 except OSError, e:
                     raise ZEBUError("Transmission problem on " + self.name + ": " + str(e))
                 if retval == 0:
@@ -422,6 +431,8 @@ class ZFSfs:
                         fd = open(status_file, 'a')
                         fd.write(cmd[1] + '\n')
                         fd.close()
+                        if Verbose:
+                            print "    transmitted " + cmd[1]
                     except OSError:
                         raise ZEBUError("Could not append to status file " + status_file)
                 else:
@@ -756,7 +767,7 @@ def main():
 	try:
 	    if DoTransmit and vault.doTransmit == True:
 		try:
-		    vault.transmit()
+		    vault.transmit(Verbose)
                     if Verbose:
                         print "Completed transmit of vault: " + vname
 		except ZEBUError, e:

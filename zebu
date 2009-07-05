@@ -348,6 +348,8 @@ class ZFSfs:
         status_file = self.path + "/.zebu_status"
 
         if self.lockfile != None:
+	    if Verbose:
+		print "Acquiring lock file " + self.lockfile
             while True:
                 try:
                     lockfd = os.open(self.lockfile, os.O_CREAT | os.O_EXCL | \
@@ -359,6 +361,8 @@ class ZFSfs:
                     time.sleep(0.1) # Wait 0.1 seconds, then retry the lockfile
                 else:
                     break
+	    if Verbose:
+		print "Locked " + self.lockfile
         else:
             lockfd = None
 
@@ -460,6 +464,8 @@ class ZFSfs:
         if lockfd != None:
             os.unlink(self.lockfile)
             lockfd.close()
+	    if Verbose:
+		print "Released " + self.lockfile
 
 
 class ZEBUVault(ZFSfs):

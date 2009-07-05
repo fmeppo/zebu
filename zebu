@@ -94,7 +94,8 @@ class ZEBUConfig:
 			 'snap_prefix': 'zebu-',
 			 'doSnapshot': 'True',
 			 'doCleanup': 'True',
-			 'doTransmit': 'False'
+			 'doTransmit': 'False',
+			 'lockfile': None
 			}
 
 	config = ConfigParser.SafeConfigParser(self.defaults)
@@ -346,6 +347,21 @@ class ZFSfs:
 
         status_file = self.path + "/.zebu_status"
 
+        if self.lockfile != None:
+            while True:
+                try:
+                    lockfd = os.open(self.lockfile, os.O_CREAT | os.O_EXCL | \
+                                                    os.O_RDWR)
+                except OSError, e:
+                    if e.errno != errno.EEXIST:
+                        raise ZEBUError("Unable to write lockfile " + \
+                                        self.lockfile)
+                    time.sleep(0.1) # Wait 0.1 seconds, then retry the lockfile
+                else:
+                    break
+        else:
+            lockfd = None
+
         try:
             s = os.stat(status_file)
             mode = "incr"
@@ -439,6 +455,11 @@ class ZFSfs:
                     raise ZEBUError("Transmission did not fully complete for " + \
                                     self.name + \
                                     " - vault may be inconsistent with backup server.")
+
+        # Release the lockfile
+        if lockfd != None:
+            os.unlink(self.lockfile)
+            lockfd.close()
 
 
 class ZEBUVault(ZFSfs):

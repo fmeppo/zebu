@@ -242,6 +242,11 @@ class ZFSfs:
 		    fset=None, fdel=None,
 		    doc="Command to transmit and receive a ZFS snapshot stream")
 
+    lockfile = property(fget=lambda self:
+			self.config.getOption(self.name, "lockfile"),
+		    fset=None, fdel=None,
+		    doc="File to lock when doing a transmit.")
+
     def snapname(self, snaptime, fsname=None):
         """
         This builds a snapshot name based on the given snapshot time.

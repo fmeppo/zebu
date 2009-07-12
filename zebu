@@ -468,7 +468,7 @@ class ZFSfs:
         # Release the lockfile
         if lockfd != None:
             os.unlink(self.lockfile)
-            lockfd.close()
+            os.close(lockfd)
 	    if Verbose:
 		print "Released " + self.lockfile
 

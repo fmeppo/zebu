@@ -352,7 +352,7 @@ class ZFSfs:
 
         status_file = self.path + "/.zebu_status"
 
-        if self.lockfile != None:
+        if self.lockfile != None and self.lockfile != "":
 	    if Verbose:
 		print "Acquiring lock file " + self.lockfile
             while True:

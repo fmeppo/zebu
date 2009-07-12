@@ -112,6 +112,18 @@ will never attempt to delete snapshots if only one snapshot is remaining.
 .I <days>:<hours>:<minutes>:<seconds>
 .\"
 .TP
+\fBlockfile\fR
+Path to a file to be used as a lock file during the transmit phase.  If this
+file is provided,
+.BP zebu
+will try and open the file exclusively before transmitting a vault.  This way,
+multiple runs of
+.BP zebu
+can safely co-exist - transmits will effectively be serialized, so any
+\fBtransmit_cmd\fR will not need to worry about potential concurrency problems.
+
+By default, no lock file will be used.
+.TP
 \fBsnap_prefix\fR
 ZFS snapshots will be created with names beginning with \fBsnap_prefix\fR.
 This defaults to "zebu-".

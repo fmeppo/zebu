@@ -506,6 +506,8 @@ class ZFSfs:
                                     " - vault may be inconsistent with " + \
 				    "backup server.")
 
+	self.unlock(lockfd, Verbose)
+
 
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):

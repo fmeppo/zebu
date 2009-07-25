@@ -344,13 +344,10 @@ class ZFSfs:
 	else:
 	    return None
 
-    def transmit(self, Verbose=False):
+    def lock(self, Verbose=False):
+	"""Aquire a lockfile, and return it as lockfd (or None, if no lockfile
+	is appropriate).
 	"""
-	Transmit latest snapshots to a backup server.  Takes a single argument, Verbose,
-        a bool to indicate whether we're running in verbose mode or not.
-	"""
-
-        status_file = self.path + "/.zebu_status"
 
         if self.lockfile != None and self.lockfile != "":
 	    if Verbose:
@@ -371,6 +368,30 @@ class ZFSfs:
         else:
             lockfd = None
 
+	return lockfd
+
+    def unlock(self, lockfd, Verbose=False):
+	"""Release the given lockfile.  Do nothing if lockfd is None."""
+
+        # Release the lockfile
+        if lockfd != None:
+            os.unlink(self.lockfile)
+            os.close(lockfd)
+	    if Verbose:
+		print "Released " + self.lockfile
+
+
+    def transmit(self, Verbose=False):
+	"""
+	Transmit latest snapshots to a backup server.  Takes a single argument, Verbose,
+        a bool to indicate whether we're running in verbose mode or not.
+	"""
+
+        status_file = self.path + "/.zebu_status"
+
+	# Hold a lockfile from this point forward
+	lockfd = self.lock(Verbose)
+
         try:
             s = os.stat(status_file)
             mode = "incr"
@@ -384,6 +405,7 @@ class ZFSfs:
                 a = fd.readlines()
                 fd.close()
             except OSError:
+		self.unlock(lockfd, Verbose)
                 raise ZEBUError("Can't parse transmit log for " + self.name)
             # Chomp trailing newlines
             for snap in a:
@@ -394,6 +416,7 @@ class ZFSfs:
             try:
                 idx = self.snapshots.index(xmit_snapshots[-1])
             except ValueError:
+		self.unlock(lockfd, Verbose)
                 raise ZEBUError("Last transmitted snapshot for " + self.name + " (" + \
                                 str(xmit_snapshots[-1]) + ") no longer exists")
 
@@ -428,25 +451,29 @@ class ZFSfs:
                             self.snapname(self.snapshots[-1], fs), None) )
                 send_cmds.append((None, self.snapshots[-1]))
             else:
-                send_cmds = [(self.zfs_path + ' send ' + self.snapname(self.snapshots[-1]), \
-                                self.snapshots[-1])]
+                send_cmds = [(self.zfs_path + ' send ' + \
+				self.snapname(self.snapshots[-1]), \
+				self.snapshots[-1])]
 
         # Perform commands n'things
-        # retval is the return value from the transmission.  Since recursive transmits
-        # need to be tracked as one entity (we aren't storing status files for each child
-        # FS, just the parent), we need to keep a running sense of the return value that
-        # may span several actual transmits.  As usual, 0 indicates success.
+        # retval is the return value from the transmission.  Since recursive
+	# transmits need to be tracked as one entity (we aren't storing status
+	# files for each child FS, just the parent), we need to keep a running
+	# sense of the return value that may span several actual transmits.  As
+	# usual, 0 indicates success.
         retval = 0
         for cmd in send_cmds:
             if cmd[0] != None:
                 try:
                     p = Popen(cmd[0] + "|" + self.transmit_cmd, shell=True)
                     if Verbose:
-                        print "    command: " + cmd[0] + " | " + self.transmit_cmd
+                        print "    command: " + cmd[0] + " | " + \
+						self.transmit_cmd
                     sts = os.waitpid(p.pid, 0)
                     if Verbose:
                         print "        return value: " + str(sts[1])
                 except OSError, e:
+		    self.unlock(lockfd, Verbose)
                     raise ZEBUError("Transmission problem on " + self.name + ": " + str(e))
                 if retval == 0:
                     retval = sts[1]
@@ -459,18 +486,13 @@ class ZFSfs:
                         if Verbose:
                             print "    transmitted " + cmd[1]
                     except OSError:
+			self.unlock(lockfd, Verbose)
                         raise ZEBUError("Could not append to status file " + status_file)
                 else:
+		    self.unlock(lockfd, Verbose)
                     raise ZEBUError("Transmission did not fully complete for " + \
                                     self.name + \
                                     " - vault may be inconsistent with backup server.")
-
-        # Release the lockfile
-        if lockfd != None:
-            os.unlink(self.lockfile)
-            os.close(lockfd)
-	    if Verbose:
-		print "Released " + self.lockfile
 
 
 class ZEBUVault(ZFSfs):

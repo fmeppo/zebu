@@ -4,7 +4,7 @@
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
 
 
-import os, sys, getopt, ConfigParser, time
+import os, sys, getopt, ConfigParser, time, errno
 from stat import *
 from subprocess import Popen, PIPE, call
 

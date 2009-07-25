@@ -855,4 +855,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+	main()
+    except KeyboardInterrupt:
+	print "Interrupt received, exiting."
+	sys.exit(37)

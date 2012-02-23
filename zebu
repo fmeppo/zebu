@@ -654,7 +654,7 @@ class ZEBUVault(ZFSfs):
 				self.name)
 
 	# Build rsync exclusions
-	if self.excludes != "":
+	if self.excludes != None:
 	    try:
 		ex = open(self.excludes, 'r')
 	    except:

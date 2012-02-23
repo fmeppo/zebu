@@ -671,7 +671,7 @@ class ZEBUVault(ZFSfs):
 	    except:
 		raise ZEBUError("Can't create excludes file: " + \
 				self.exclude_path)
-	if self.additional_excludes != "":
+	if self.additional_excludes != None:
 	    try:
 		ex = open(self.additional_excludes, 'r')
 	    except:

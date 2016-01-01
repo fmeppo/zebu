@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/local/bin/python2
 #
 # zebu is an zfs-based backup utility.  It syncs down a copy of a system to
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
@@ -255,9 +255,10 @@ class ZFSfs:
         This builds a snapshot name based on the given snapshot time.
         """
         if fsname == None:
-            return self.name + '@' + self.snap_prefix + snaptime
+            return self.name.replace(" ", "\ ") + '@' + self.snap_prefix + \
+                snaptime
         else:
-            return fsname + '@' + self.snap_prefix + snaptime
+            return fsname.replace(" ", "\ ") + '@' + self.snap_prefix + snaptime
 
     def snapshot(self):
 	"""
@@ -316,7 +317,7 @@ class ZFSfs:
         if po.returncode != 0:
             raise ZEBUError("Problem obtaining ZFS filesystem list")
         for line in out:
-            self.__filesystems__.append(line.split()[0])
+            self.__filesystems__.append(line.split('\t')[0])
 
         return self.__filesystems__
 

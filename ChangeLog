@@ -1,3 +1,11 @@
+1.0.3:
+    Bug fix: handle filesystems with spaces in the names (courtesy Rob Rati).
+
+1.0.2:
+    Increment minor version, to denote move from SVN to git.  Necessary to
+    demark the first tag in git.  Also rebuild the README to use markdown
+    for formatting.
+
 1.0.1:
     Fix some comparisons with default values, which no longer work in python
     2.7 (as None != "").

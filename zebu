@@ -721,7 +721,7 @@ def usage():
 
 
 def version():
-    print "zebu version 1.0.3, copyight Mike Shuey (<shuey@fmepnet.org>), 2015"
+    print "zebu version 1.1, copyight Mike Shuey (<shuey@fmepnet.org>), 2016"
 
 
 def main():

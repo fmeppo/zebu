@@ -1,3 +1,7 @@
+1.1:
+    Begin tracking child filesystems from run to run, so we can properly
+    detect (and propagate) a new filesystem on the sender's side.
+
 1.0.3:
     Bug fix: handle filesystems with spaces in the names (courtesy Rob Rati).
 

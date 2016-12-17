@@ -399,12 +399,18 @@ class ZFSfs:
 	# Hold a lockfile from this point forward
 	lockfd = self.lock(Verbose)
 
+        # If the status file exists, we can do incrementals.
         try:
             s = os.stat(status_file)
             mode = "incr"
             if Verbose:
                 print "  xmit (incremental): " + self.name
+        except OSError:
+            mode = "full"
+            if Verbose:
+                print "  xmit (full): " + self.name
 
+        if mode == "incr":
             # Build list of sent snapshots
             xmit_snapshots = []
             try:
@@ -449,11 +455,8 @@ class ZFSfs:
 				    self.snapname(self.snapshots[idx + 1]), \
 				    self.snapshots[idx + 1] ) )
                 idx = idx + 1
-        except OSError:
-            # status file is missing
-            mode = "full"
-            if Verbose:
-                print "  xmit (full): " + self.name
+        else:
+            # status file is missing, mode == "full"
             if self.recurse:
                 send_cmds = []
                 for fs in self.filesystems:

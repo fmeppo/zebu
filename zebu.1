@@ -166,4 +166,8 @@ zebu.conf(5)
 \fBzebu\fR was written by Mike Shuey <shuey@fmepnet.org> and is licensed under
 the terms of the GNU Public License, version 2 or higher.
 .SH "KNOWN ISSUES"
-None currently.
+If a new filesystem is created below a recursive mount, where incremental
+transfers have already taken place,
+\fBzebu\fR will not detect the new filesystem.  Instead, the tool will fail;
+only deltas are transmitted, and as the new filesystem did not have previous
+snapshots the delta cannot be sent.  This will be fixed in an upcoming version.

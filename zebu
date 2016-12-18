@@ -4,7 +4,7 @@
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
 
 
-import os, sys, getopt, ConfigParser, time, errno
+import os, sys, getopt, ConfigParser, time, errno, pickle
 from stat import *
 from subprocess import Popen, PIPE, call
 
@@ -395,6 +395,7 @@ class ZFSfs:
 	"""
 
         status_file = self.path + "/.zebu_status"
+        kids_file = self.path + "/.zebu_children"
 
 	# Hold a lockfile from this point forward
 	lockfd = self.lock(Verbose)
@@ -409,6 +410,30 @@ class ZFSfs:
             mode = "full"
             if Verbose:
                 print "  xmit (full): " + self.name
+
+        if self.recurse:
+            # Attempt to load the cached list of child filesystems, so we can
+            # tell if a new one has been created.
+            try:
+                kids_fd = open(kids_file, 'r')
+                try:
+                    kids = pickle.load(kids_fd)
+                except pickle.PickleError:
+                    if Verbose:
+                        print "Couldn't load " + kids_file + \
+                              " due to a formatting error.  Ignoring it."
+                    kids = None
+                kids_fd.close()
+            except OSError:
+                if Verbose:
+                    print "Notice: Missing " + kids_file
+                kids = None
+
+        out = po.communicate()[0].splitlines()
+        if po.returncode != 0:
+            raise ZEBUError("Problem obtaining ZFS filesystem list")
+        for line in out:
+            self.__filesystems__.append(line.split('\t')[0])
 
         if mode == "incr":
             # Build list of sent snapshots
@@ -438,22 +463,38 @@ class ZFSfs:
 	    # tuples; the first element is a command to send, and the second is
 	    # a snapshot name to record in the status file.  If either are None,
 	    # that action is skipped.
+
+            # Don't iterate beyond the next-to-last snap, since send commands
+            # will reference that snap, plus the next one (and the last snap
+            # has no next snap).
+            max_idx = len(self.snapshots) - 1
             send_cmds = []
-            while idx < len(self.snapshots):
-                if idx != (len(self.snapshots) - 1):
-                    if self.recurse:
-                        for fs in self.filesystems:
-                            send_cmds.append((self.zfs_path + ' send -i ' + \
-				    self.snapname(self.snapshots[idx], \
-				    fs) + ' ' + \
-				    self.snapname(self.snapshots[idx + 1], fs),
-				    None))
-			send_cmds.append((None, self.snapshots[idx + 1]))
-                    else:
-                        send_cmds.append((self.zfs_path + ' send -i ' + \
-				    self.snapname(self.snapshots[idx]) + ' ' + \
-				    self.snapname(self.snapshots[idx + 1]), \
-				    self.snapshots[idx + 1] ) )
+            while idx < max_idx:
+                if self.recurse:
+                    for fs in self.filesystems:
+                        # New children in recursive filesystems need special
+                        # handling - they can only take a full copy of the
+                        # last snapshot index (no incrementals yet).
+                        try:
+                            i = kids.index(fs)
+                            send_cmds.append((self.zfs_path + \
+                                ' send -i ' + \
+                                self.snapname(self.snapshots[idx], \
+                                fs) + ' ' + \
+                                self.snapname(self.snapshots[idx + 1], fs),
+                                None))
+                        except ValueError:
+                            # Only send the last snapshot of the new filesystem.
+                            if idx == max_idx - 1:
+                                send_cmds.append((self.zfs_path + ' send ' + \
+                                    self.snapname(self.snapshots[idx], fs),
+                                    None))
+                    send_cmds.append((None, self.snapshots[idx + 1]))
+                else:
+                    send_cmds.append((self.zfs_path + ' send -i ' + \
+                                self.snapname(self.snapshots[idx]) + ' ' + \
+                                self.snapname(self.snapshots[idx + 1]), \
+                                self.snapshots[idx + 1] ) )
                 idx = idx + 1
         else:
             # status file is missing, mode == "full"
@@ -509,6 +550,21 @@ class ZFSfs:
 				    + self.name + \
                                     " - vault may be inconsistent with " + \
 				    "backup server.")
+
+        if self.recurse:
+            # Drop the current list of child filesystems, for future reference
+            try:
+                kids_fd = open(kids_file, 'w')
+                try:
+                    pickle.dump(self.filesystems, kids_fd)
+                except pickle.PickleError:
+                    if Verbose:
+                        print "Couldn't write " + kids_file + \
+                              " due to a formatting error.  Ignoring it."
+                kids_fd.close()
+            except OSError:
+                if Verbose:
+                    print "Notice: Couldn't write " + kids_file
 
 	self.unlock(lockfd, Verbose)
 

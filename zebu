@@ -424,7 +424,7 @@ class ZFSfs:
                               " due to a formatting error.  Ignoring it."
                     kids = None
                 kids_fd.close()
-            except OSError:
+            except IOError:
                 if Verbose:
                     print "Notice: Missing " + kids_file
                 kids = None
@@ -556,7 +556,7 @@ class ZFSfs:
                         print "Couldn't write " + kids_file + \
                               " due to a formatting error.  Ignoring it."
                 kids_fd.close()
-            except OSError:
+            except IOError:
                 if Verbose:
                     print "Notice: Couldn't write " + kids_file
 

@@ -482,7 +482,7 @@ class ZFSfs:
                             # Only send the last snapshot of the new filesystem.
                             if idx == max_idx - 1:
                                 send_cmds.append((self.zfs_path + ' send ' + \
-                                    self.snapname(self.snapshots[idx], fs),
+                                    self.snapname(self.snapshots[idx + 1], fs),
                                     None))
                     send_cmds.append((None, self.snapshots[idx + 1]))
                 else:

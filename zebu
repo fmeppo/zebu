@@ -470,7 +470,8 @@ class ZFSfs:
                         # handling - they can only take a full copy of the
                         # last snapshot index (no incrementals yet).
                         try:
-                            i = kids.index(fs)
+                            if kids != None:
+                                i = kids.index(fs)
                             send_cmds.append((self.zfs_path + \
                                 ' send -i ' + \
                                 self.snapname(self.snapshots[idx], \

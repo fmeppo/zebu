@@ -429,12 +429,6 @@ class ZFSfs:
                     print "Notice: Missing " + kids_file
                 kids = None
 
-        out = po.communicate()[0].splitlines()
-        if po.returncode != 0:
-            raise ZEBUError("Problem obtaining ZFS filesystem list")
-        for line in out:
-            self.__filesystems__.append(line.split('\t')[0])
-
         if mode == "incr":
             # Build list of sent snapshots
             xmit_snapshots = []

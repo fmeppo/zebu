@@ -119,6 +119,22 @@ data to send) and the cleanup phase removes the necessary source snapshots befor
 can be sent as an incremental transmission.  Take care to configure expire times
 accordingly.
 .PP
+A new filesystem created in a recursive vault will not have the same snapshot
+history as its peers.  On each run across a recursive vault,
+.BR zebu
+will save the list of child filesystems in a file named \fI.zebu_children\fP.
+If new children have appeared since the last run, the only the latest
+snapshot will be transferred for the new child.  As long as current
+.BR zebu
+run completes, both the source and destination systems will remain in sync
+(and further runs will include the new filesystem, as normal).  However, if
+.BR zebu
+fails during this run additional work may be required to maintain
+synchronization.
+If the \fI.zebu_children\fP file does not exist, a new one will silently be
+created (and new children will not be properly detected until the creation
+has completed).
+.PP
 The use of the \fB-F\fR option with
 .BR "zfs recv"
 is recommended for recursive vaults being sent to another live ZFS filesystem.  To pipe
@@ -166,8 +182,6 @@ zebu.conf(5)
 \fBzebu\fR was written by Mike Shuey <shuey@fmepnet.org> and is licensed under
 the terms of the GNU Public License, version 2 or higher.
 .SH "KNOWN ISSUES"
-If a new filesystem is created below a recursive mount, where incremental
-transfers have already taken place,
-\fBzebu\fR will not detect the new filesystem.  Instead, the tool will fail;
-only deltas are transmitted, and as the new filesystem did not have previous
-snapshots the delta cannot be sent.  This will be fixed in an upcoming version.
+Zebu will detect a new filesystem created in a recursively-copied vault, and
+copy it appropriately.  However, deleted filesystems will not be similarly
+detected.

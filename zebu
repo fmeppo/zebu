@@ -139,6 +139,12 @@ class ZEBUConfig:
 	else:
 	    raise ZEBUError("Vault " + name + " does not exist in " + str(self))
 
+    def getVaults(self):
+        vlist = []
+        for name in self.getVaultNames():
+            vlist.append(self.getVault(name))
+        return vlist
+
 
 class ZFSfs:
     def __init__(self, name, config):
@@ -147,6 +153,9 @@ class ZFSfs:
 	self.__buildSnapshots__()
 	self.expiretime = self.__getExpiretime__()
         self.__filesystems__ = None
+
+    def __str__(self):
+        return self.name
 
     def getZFSProperty(self, prop):
 	"""
@@ -262,6 +271,8 @@ class ZFSfs:
 	except OSError, e:
 	    raise ZEBUError("Could not execute snapshot for " + self.name)
 	if ret == 0:
+            # If we made a snap, add it to the internal state (saving a re-scan)
+            self.snapshots.append(snaptime)
 	    return snapname
 	else:
 	    raise ZEBUError("Error creating snapshot " + snapname)
@@ -820,10 +831,14 @@ def main():
     if Verbose:
 	print "Found config: " + str(config)
 
-    if SingleShotVault != None:
-	vaults = [SingleShotVault]
-    else:
-	vaults = config.getVaultNames()
+    try:
+        if SingleShotVault != None:
+            vaults = [config.getVault(SingleShotVault)]
+        else:
+            vaults = config.getVaults()
+    except ZEBUError, e:
+        print str(e)
+        sys.exit(3)
 
     #
     # Run snapshot phase
@@ -832,25 +847,20 @@ def main():
 	if Verbose:
 	    print "Skipping snapshot phase."
     else:
-	for vname in vaults:
+	for vault in vaults:
 	    if Verbose:
-		print "Selecting source vault for snapshot: " + vname
-            try:
-                vault = config.getVault(vname)
-            except ZEBUError, e:
-                print str(e)
-                continue
+		print "Selecting source vault for snapshot: " + str(vault)
 
             if vault.doSnapshot:
                 try:
-                    vault.snapshot(Verbose)
+                    vault.snapshot()
                     if Verbose:
-                        print "Completed snapshot of vault: " + vname
+                        print "Completed snapshot of vault: " + str(vault)
                 except ZEBUError, e:
                     print str(e)
-                    print "Problem snapshotting vault %s: %s" % (vname, str(e))
+                    print "Problem snapshotting vault %s: %s" % (str(vault), str(e))
             elif Verbose:
-                print vname + ": skipping snapshot"
+                print str(vault) + ": skipping snapshot"
 
     #
     # Run cleanup phase
@@ -859,25 +869,20 @@ def main():
 	if Verbose:
 	    print "Skipping cleanup phase."
     else:
-	for vname in vaults:
+	for vault in vaults:
 	    if Verbose:
-		print "Selecting vault for cleanup: " + vname
-            try:
-                vault = config.getVault(vname)
-            except ZEBUError, e:
-                print str(e)
-                continue
+		print "Selecting vault for cleanup: " + str(vault)
 
             if vault.doCleanup:
                 try:
-                    vault.cleanup(Verbose)
+                    vault.cleanup()
                     if Verbose:
-                        print "Cleaned up vault: " + vname
+                        print "Cleaned up vault: " + str(vault)
                 except ZEBUError, e:
                     print str(e)
-                    print "Problem cleaning vault %s: %s" % (vname, str(e))
+                    print "Problem cleaning vault %s: %s" % (str(vault), str(e))
             elif Verbose:
-                print vname + ": skipping cleanup"
+                print str(vault) + ": skipping cleanup"
 
     #
     # Run transmit phase
@@ -886,25 +891,20 @@ def main():
         if Verbose:
             print "Skipping transmit phase"
     else:
-        for vname in vaults:
+        for vault in vaults:
             if Verbose:
-                print "Selecting source vault for transmit: " + vname
-            try:
-                vault = config.getVault(vname)
-            except ZEBUError, e:
-                print str(e)
-                continue
+                print "Selecting source vault for transmit: " + str(vault)
 
             if vault.doTransmit:
 		try:
 		    vault.transmit(Verbose)
                     if Verbose:
-                        print "Completed transmit of vault: " + vname
+                        print "Completed transmit of vault: " + str(vault)
 		except ZEBUError, e:
 		    print str(e)
-                    print "Problem transmitting vault %s: %s" % (vname, str(e))
+                    print "Problem transmitting vault %s: %s" % (str(vault), str(e))
 	    elif Verbose:
-		print vname + ": skipping transmit"
+		print str(vault) + ": skipping transmit"
 
 
 if __name__ == "__main__":

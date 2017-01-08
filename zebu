@@ -89,13 +89,12 @@ class ZEBUConfig:
 			 'lockfile': None
 			}
 
-	config = ConfigParser.SafeConfigParser(self.defaults)
+	self.config = ConfigParser.SafeConfigParser(self.defaults)
 	try:
-	    list = config.read([file])
+	    list = self.config.read([file])
 	except:
 	    raise ZEBUError("Error reading config file " + file)
 
-	self.config = config	# ConfigParser object
 	self.filename = list[0]	# config file name
 
     def __str__(self):

@@ -876,28 +876,29 @@ def main():
     #
     # Run transmit phase
     #
-    for vname in vaults:
-	if Verbose:
-	    print "Selecting source vault for transmit: " + vname
-	try:
-	    vault = config.getVault(vname)
-	except ZEBUError, e:
-	    print str(e)
-	    continue
+    if not DoTransmit:
+        if Verbose:
+            print "Skipping transmit phase"
+    else:
+        for vname in vaults:
+            if Verbose:
+                print "Selecting source vault for transmit: " + vname
+            try:
+                vault = config.getVault(vname)
+            except ZEBUError, e:
+                print str(e)
+                continue
 
-	try:
-	    if DoTransmit and vault.doTransmit == True:
+            if vault.doTransmit:
 		try:
 		    vault.transmit(Verbose)
                     if Verbose:
                         print "Completed transmit of vault: " + vname
 		except ZEBUError, e:
 		    print str(e)
-                    print "Problem transmitting vault: " + vname
+                    print "Problem transmitting vault %s: %s" % (vname, str(e))
 	    elif Verbose:
 		print vname + ": skipping transmit"
-	except ZEBUError, e:
-	    print vname + ", error during transmit: " + str(e)
 
 
 if __name__ == "__main__":

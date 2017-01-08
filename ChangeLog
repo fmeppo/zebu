@@ -1,3 +1,10 @@
+1.2:
+    Code cleanup, to reduce the amount of late-night cruft introduced over the
+    years.
+
+    Significant speedup, largely due to fetching ZFSfs objects once per object
+    (rather than once per object per stage).
+
 1.1:
     Begin tracking child filesystems from run to run, so we can properly
     detect (and propagate) a new filesystem on the sender's side.

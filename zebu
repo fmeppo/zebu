@@ -9,23 +9,12 @@ from stat import *
 from subprocess import Popen, PIPE, call
 
 
-class ZEBUError:
-    def __init__(self, str=None):
-	if str != None:
-	    self.string = str
-	else:
-	    self.string = "Unknown ZEBU error"
-
-    def __str__(self):
-	return self.string
+class ZEBUError(Exception):
+    pass
 
 
 class ZEBUValueError(ZEBUError):
-    def __init__(self, str=None):
-	if str != None:
-	    self.string = str
-	else:
-	    self.string = "Required ZEBU Value not found"
+    pass
 
 
 class ZEBUErrorLogger:

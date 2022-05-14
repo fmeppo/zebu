@@ -93,7 +93,7 @@ class ZEBUConfig:
             "lockfile": None,
         }
 
-        self.config = ConfigParser.SafeConfigParser(self.defaults)
+        self.config = configparser.SafeConfigParser(self.defaults)
         try:
             list = self.config.read([file])
         except:
@@ -109,7 +109,7 @@ class ZEBUConfig:
 
     # Allow vault-specific options to override defaults, and declared defaults
     # to override hard-coded defaults.  All this happens automatically in the
-    # stock ConfigParser module.
+    # stock configparser module.
     def getOption(self, vault, option):
         if self.config.has_option(vault, option):
             return self.config.get(vault, option)

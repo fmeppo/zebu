@@ -37,11 +37,14 @@ class ZEBUErrorLogger:
     def flush(self):
         if len(self.log) != 0:
             try:
-                fd = open(self.logpath, 'w')
+                fd = open(self.logpath, "w")
                 for tuple in self.log:
-                    fd.write(time.strftime("%d %b %Y %H:%M:%S ", tuple[0]) +
-                             tuple[1] + " " +
-                             tuple[2])
+                    fd.write(
+                        time.strftime("%d %b %Y %H:%M:%S ", tuple[0])
+                        + tuple[1]
+                        + " "
+                        + tuple[2]
+                    )
                 fd.close()
             except:
                 raise ZEBUError("Could not write log to " + self.logpath)
@@ -55,15 +58,15 @@ class ZEBUErrorLogger:
                 try:
                     os.unlink(self.logpath)
                 except:
-                    raise ZEBUError("Could not remove obsolete log file: " + \
-                                    self.logpath)
+                    raise ZEBUError(
+                        "Could not remove obsolete log file: " + self.logpath
+                    )
 
 
 class ZEBUConfig:
     def __init__(self, file=None):
         if file == None:
-            default_files = ["/etc/zebu/zebu.conf", \
-                             "/usr/local/etc/zebu/zebu.conf"]
+            default_files = ["/etc/zebu/zebu.conf", "/usr/local/etc/zebu/zebu.conf"]
             for default in default_files:
                 try:
                     m = os.stat(default)[ST_MODE]
@@ -77,17 +80,18 @@ class ZEBUConfig:
             raise ZEBUError("No config file found.")
 
         # hardcoded defaults
-        self.defaults = {'excludes': None,
-                         'additional_excludes': None,
-                         'rsync_path': 'rsync',
-                         'zfs_path': '/sbin/zfs',
-                         'recurse': 'no',
-                         'snap_prefix': 'zebu-',
-                         'doSnapshot': 'True',
-                         'doCleanup': 'True',
-                         'doTransmit': 'False',
-                         'lockfile': None
-                        }
+        self.defaults = {
+            "excludes": None,
+            "additional_excludes": None,
+            "rsync_path": "rsync",
+            "zfs_path": "/sbin/zfs",
+            "recurse": "no",
+            "snap_prefix": "zebu-",
+            "doSnapshot": "True",
+            "doCleanup": "True",
+            "doTransmit": "False",
+            "lockfile": None,
+        }
 
         self.config = ConfigParser.SafeConfigParser(self.defaults)
         try:
@@ -95,7 +99,7 @@ class ZEBUConfig:
         except:
             raise ZEBUError("Error reading config file " + file)
 
-        self.filename = list[0] # config file name
+        self.filename = list[0]  # config file name
 
     def __str__(self):
         return self.filename
@@ -110,19 +114,20 @@ class ZEBUConfig:
         if self.config.has_option(vault, option):
             return self.config.get(vault, option)
         else:
-            raise ZEBUValueError("Required option \"" + option + "\" not set.")
+            raise ZEBUValueError('Required option "' + option + '" not set.')
 
     # Get a boolean option, and return a python True or False.
     # Invalid values in the config file will raise an error.
     def getBoolOption(self, vault, option):
         value = self.config.get(vault, option)
-        if value in ['yes','Yes','true','True','1','y',True]:
+        if value in ["yes", "Yes", "true", "True", "1", "y", True]:
             return True
-        elif value in ['no','No','false','False','0','n',False]:
+        elif value in ["no", "No", "false", "False", "0", "n", False]:
             return False
         else:
-            raise ZEBUValueError("Malformed value for boolean option \"" \
-                                    + option + "\": " + str(value))
+            raise ZEBUValueError(
+                'Malformed value for boolean option "' + option + '": ' + str(value)
+            )
 
     def hasVault(self, vault):
         if vault in self.getVaultNames():
@@ -162,8 +167,9 @@ class ZFSfs:
         Get arbitrary properties off the ZFS file system.
         """
         try:
-            po = Popen([self.zfs_path, 'list', '-o', prop, self.name],
-                      stdout=PIPE,stderr=PIPE)
+            po = Popen(
+                [self.zfs_path, "list", "-o", prop, self.name], stdout=PIPE, stderr=PIPE
+            )
         except OSError as e:
             raise ZEBUError("Cannot obtain ZFS properties for " + self.name)
 
@@ -178,7 +184,7 @@ class ZFSfs:
 
     def __getExpiretime__(self):
         r = self.config.getOption(self.name, "expiretime")
-        et = r.split(':')
+        et = r.split(":")
         if len(et) > 4:
             raise ZEBUError("Invalid expiretime for " + self.name + ": " + r)
         times = []
@@ -189,73 +195,96 @@ class ZFSfs:
             raise ZEBUError("Invalid expiretime for " + self.name + ": " + r)
 
         # Convert time to seconds
-        sec = times[0] * 24     # hours
+        sec = times[0] * 24  # hours
         if len(times) > 1:
             sec += times[1]
-        sec = sec * 60          # minutes
+        sec = sec * 60  # minutes
         if len(times) > 2:
             sec += times[2]
-        sec = sec * 60          # seconds
+        sec = sec * 60  # seconds
         if len(times) > 3:
             sec += times[3]
 
         return time.localtime(time.time() - sec)
 
-    snap_prefix = property(fget=lambda self:
-                                self.config.getOption(self.name, "snap_prefix"),
-                        fset=None, fdel=None,
-                        doc="Prefix for new snapshots")
+    snap_prefix = property(
+        fget=lambda self: self.config.getOption(self.name, "snap_prefix"),
+        fset=None,
+        fdel=None,
+        doc="Prefix for new snapshots",
+    )
 
-    recurse = property(fget=__getRecursion__, fset=None, fdel=None,
-                       doc="Bool to indicate whether ZFS actions are recursive")
+    recurse = property(
+        fget=__getRecursion__,
+        fset=None,
+        fdel=None,
+        doc="Bool to indicate whether ZFS actions are recursive",
+    )
 
-    path = property(fget=lambda self:
-                        self.getZFSProperty('mountpoint'),
-                    fset=None, fdel=None, doc="mountpoint for filesystem")
+    path = property(
+        fget=lambda self: self.getZFSProperty("mountpoint"),
+        fset=None,
+        fdel=None,
+        doc="mountpoint for filesystem",
+    )
 
-    zfs_path = property(fget=lambda self: 
-                        self.config.getOption(self.name, "zfs_path"),
-                    fset=None, fdel=None, doc="path to zfs binary")
+    zfs_path = property(
+        fget=lambda self: self.config.getOption(self.name, "zfs_path"),
+        fset=None,
+        fdel=None,
+        doc="path to zfs binary",
+    )
 
-    doSnapshot = property(fget=lambda self:
-                        self.config.getBoolOption(self.name, "doSnapshot"),
-                    fset=None, fdel=None,
-                    doc="True/False: perform snapshots on target vault")
+    doSnapshot = property(
+        fget=lambda self: self.config.getBoolOption(self.name, "doSnapshot"),
+        fset=None,
+        fdel=None,
+        doc="True/False: perform snapshots on target vault",
+    )
 
-    doCleanup = property(fget=lambda self:
-                        self.config.getBoolOption(self.name, "doCleanup"),
-                    fset=None, fdel=None,
-                    doc="True/False: perform snapshot cleanup on target vault")
+    doCleanup = property(
+        fget=lambda self: self.config.getBoolOption(self.name, "doCleanup"),
+        fset=None,
+        fdel=None,
+        doc="True/False: perform snapshot cleanup on target vault",
+    )
 
-    doTransmit = property(fget=lambda self:
-                        self.config.getBoolOption(self.name, "doTransmit"),
-                    fset=None, fdel=None,
-                    doc="True/False: transmit snapshots from target vault")
+    doTransmit = property(
+        fget=lambda self: self.config.getBoolOption(self.name, "doTransmit"),
+        fset=None,
+        fdel=None,
+        doc="True/False: transmit snapshots from target vault",
+    )
 
-    filesystems = property(fget=lambda self:
-                    self.__buildFilesystems__(), fset=None, fdel=None,
-                    doc="List of filesystems (including children) matching" + \
-                        "this path.")
+    filesystems = property(
+        fget=lambda self: self.__buildFilesystems__(),
+        fset=None,
+        fdel=None,
+        doc="List of filesystems (including children) matching" + "this path.",
+    )
 
-    transmit_cmd = property(fget=lambda self:
-                        self.config.getOption(self.name, "transmit_cmd"),
-                    fset=None, fdel=None,
-                    doc="Command to transmit and receive a ZFS snapshot stream")
+    transmit_cmd = property(
+        fget=lambda self: self.config.getOption(self.name, "transmit_cmd"),
+        fset=None,
+        fdel=None,
+        doc="Command to transmit and receive a ZFS snapshot stream",
+    )
 
-    lockfile = property(fget=lambda self:
-                        self.config.getOption(self.name, "lockfile"),
-                    fset=None, fdel=None,
-                    doc="File to lock when doing a transmit.")
+    lockfile = property(
+        fget=lambda self: self.config.getOption(self.name, "lockfile"),
+        fset=None,
+        fdel=None,
+        doc="File to lock when doing a transmit.",
+    )
 
     def snapname(self, snaptime, fsname=None):
         """
         This builds a snapshot name based on the given snapshot time.
         """
         if fsname == None:
-            return self.name.replace(" ", "\ ") + '@' + self.snap_prefix + \
-                snaptime
+            return self.name.replace(" ", "\ ") + "@" + self.snap_prefix + snaptime
         else:
-            return fsname.replace(" ", "\ ") + '@' + self.snap_prefix + snaptime
+            return fsname.replace(" ", "\ ") + "@" + self.snap_prefix + snaptime
 
     def snapshot(self):
         """
@@ -265,9 +294,9 @@ class ZFSfs:
         snapname = self.snapname(snaptime)
         try:
             if self.recurse:
-                ret = call([self.zfs_path, 'snapshot', '-r', snapname])
+                ret = call([self.zfs_path, "snapshot", "-r", snapname])
             else:
-                ret = call([self.zfs_path, 'snapshot', snapname])
+                ret = call([self.zfs_path, "snapshot", snapname])
         except OSError as e:
             raise ZEBUError("Could not execute snapshot for " + self.name)
         if ret == 0:
@@ -283,16 +312,18 @@ class ZFSfs:
         """
         self.snapshots = []
         try:
-            po = Popen([self.zfs_path, 'list', '-o', 'name', '-H',
-                        '-t', 'snapshot'],
-                       stdout=PIPE,stderr=PIPE)
+            po = Popen(
+                [self.zfs_path, "list", "-o", "name", "-H", "-t", "snapshot"],
+                stdout=PIPE,
+                stderr=PIPE,
+            )
         except OSError as e:
             raise ZEBUError("Cannot obtain ZFS snapshot list")
 
         out = po.communicate()[0].splitlines()
         if po.returncode != 0:
             raise ZEBUError("Problem obtaining ZFS snapshot list")
-        prefix = self.name + '@' + self.snap_prefix
+        prefix = self.name + "@" + self.snap_prefix
         for line in out:
             if line.startswith(prefix):
                 self.snapshots.append(line.split(prefix)[1])
@@ -306,9 +337,11 @@ class ZFSfs:
 
         self.__filesystems__ = []
         try:
-            po = Popen([self.zfs_path, 'list', '-r', '-H', '-t', 'filesystem', \
-                        self.name],
-                       stdout=PIPE, stderr=PIPE)
+            po = Popen(
+                [self.zfs_path, "list", "-r", "-H", "-t", "filesystem", self.name],
+                stdout=PIPE,
+                stderr=PIPE,
+            )
         except OSError as e:
             raise ZEBUError("Cannot obtain ZFS filesystem list")
 
@@ -316,7 +349,7 @@ class ZFSfs:
         if po.returncode != 0:
             raise ZEBUError("Problem obtaining ZFS filesystem list")
         for line in out:
-            self.__filesystems__.append(line.split('\t')[0])
+            self.__filesystems__.append(line.split("\t")[0])
 
         return self.__filesystems__
 
@@ -334,10 +367,9 @@ class ZFSfs:
                     snapname = self.snapname(snap)
                     try:
                         if self.recurse:
-                            po = Popen([self.zfs_path, 'destroy', '-r', \
-                                        snapname])
+                            po = Popen([self.zfs_path, "destroy", "-r", snapname])
                         else:
-                            po = Popen([self.zfs_path, 'destroy', snapname])
+                            po = Popen([self.zfs_path, "destroy", snapname])
                         po.communicate()
                     except OSError as e:
                         raise ZEBUError("Cannot obtain ZFS snapshot list")
@@ -359,13 +391,11 @@ class ZFSfs:
                 print("Acquiring lock file " + self.lockfile)
             while True:
                 try:
-                    lockfd = os.open(self.lockfile, os.O_CREAT | os.O_EXCL | \
-                                                    os.O_RDWR)
+                    lockfd = os.open(self.lockfile, os.O_CREAT | os.O_EXCL | os.O_RDWR)
                 except OSError as e:
                     if e.errno != errno.EEXIST:
-                        raise ZEBUError("Unable to write lockfile " + \
-                                        self.lockfile)
-                    time.sleep(0.1) # Wait 0.1 seconds, then retry the lockfile
+                        raise ZEBUError("Unable to write lockfile " + self.lockfile)
+                    time.sleep(0.1)  # Wait 0.1 seconds, then retry the lockfile
                 else:
                     break
             if Verbose:
@@ -384,7 +414,6 @@ class ZFSfs:
             os.close(lockfd)
             if Verbose:
                 print("Released " + self.lockfile)
-
 
     def transmit(self, Verbose=False):
         """
@@ -414,13 +443,16 @@ class ZFSfs:
             # Attempt to load the cached list of child filesystems, so we can
             # tell if a new one has been created.
             try:
-                kids_fd = open(kids_file, 'r')
+                kids_fd = open(kids_file, "r")
                 try:
                     kids = pickle.load(kids_fd)
                 except pickle.PickleError:
                     if Verbose:
-                        print("Couldn't load " + kids_file + \
-                              " due to a formatting error.  Ignoring it.")
+                        print(
+                            "Couldn't load "
+                            + kids_file
+                            + " due to a formatting error.  Ignoring it."
+                        )
                     kids = None
                 kids_fd.close()
             except IOError:
@@ -432,7 +464,7 @@ class ZFSfs:
             # Build list of sent snapshots
             xmit_snapshots = []
             try:
-                fd = open(status_file, 'r')
+                fd = open(status_file, "r")
                 a = fd.readlines()
                 fd.close()
             except OSError:
@@ -448,9 +480,13 @@ class ZFSfs:
                 idx = self.snapshots.index(xmit_snapshots[-1])
             except ValueError:
                 self.unlock(lockfd, Verbose)
-                raise ZEBUError("Last transmitted snapshot for " + self.name + \
-                                " (" + str(xmit_snapshots[-1]) + \
-                                ") no longer exists")
+                raise ZEBUError(
+                    "Last transmitted snapshot for "
+                    + self.name
+                    + " ("
+                    + str(xmit_snapshots[-1])
+                    + ") no longer exists"
+                )
 
             # Gather the list of incremental send commands.  Send commands are
             # tuples; the first element is a command to send, and the second is
@@ -471,37 +507,61 @@ class ZFSfs:
                         try:
                             if kids != None:
                                 i = kids.index(fs)
-                            send_cmds.append((self.zfs_path + \
-                                ' send -i ' + \
-                                self.snapname(self.snapshots[idx], \
-                                fs) + ' ' + \
-                                self.snapname(self.snapshots[idx + 1], fs),
-                                None))
+                            send_cmds.append(
+                                (
+                                    self.zfs_path
+                                    + " send -i "
+                                    + self.snapname(self.snapshots[idx], fs)
+                                    + " "
+                                    + self.snapname(self.snapshots[idx + 1], fs),
+                                    None,
+                                )
+                            )
                         except ValueError:
                             # Only send the last snapshot of the new filesystem.
                             if idx == max_idx - 1:
-                                send_cmds.append((self.zfs_path + ' send ' + \
-                                    self.snapname(self.snapshots[idx + 1], fs),
-                                    None))
+                                send_cmds.append(
+                                    (
+                                        self.zfs_path
+                                        + " send "
+                                        + self.snapname(self.snapshots[idx + 1], fs),
+                                        None,
+                                    )
+                                )
                     send_cmds.append((None, self.snapshots[idx + 1]))
                 else:
-                    send_cmds.append((self.zfs_path + ' send -i ' + \
-                                self.snapname(self.snapshots[idx]) + ' ' + \
-                                self.snapname(self.snapshots[idx + 1]), \
-                                self.snapshots[idx + 1] ) )
+                    send_cmds.append(
+                        (
+                            self.zfs_path
+                            + " send -i "
+                            + self.snapname(self.snapshots[idx])
+                            + " "
+                            + self.snapname(self.snapshots[idx + 1]),
+                            self.snapshots[idx + 1],
+                        )
+                    )
                 idx = idx + 1
         else:
             # status file is missing, mode == "full"
             if self.recurse:
                 send_cmds = []
                 for fs in self.filesystems:
-                    send_cmds.append((self.zfs_path + ' send ' + \
-                            self.snapname(self.snapshots[-1], fs), None) )
+                    send_cmds.append(
+                        (
+                            self.zfs_path
+                            + " send "
+                            + self.snapname(self.snapshots[-1], fs),
+                            None,
+                        )
+                    )
                 send_cmds.append((None, self.snapshots[-1]))
             else:
-                send_cmds = [(self.zfs_path + ' send ' + \
-                                self.snapname(self.snapshots[-1]), \
-                                self.snapshots[-1])]
+                send_cmds = [
+                    (
+                        self.zfs_path + " send " + self.snapname(self.snapshots[-1]),
+                        self.snapshots[-1],
+                    )
+                ]
 
         # Perform commands n'things
         # retval is the return value from the transmission.  Since recursive
@@ -515,46 +575,52 @@ class ZFSfs:
                 try:
                     p = Popen(cmd[0] + "|" + self.transmit_cmd, shell=True)
                     if Verbose:
-                        print("    command: " + cmd[0] + " | " + \
-                                                self.transmit_cmd)
+                        print("    command: " + cmd[0] + " | " + self.transmit_cmd)
                     sts = os.waitpid(p.pid, 0)
                     if Verbose:
                         print("        return value: " + str(sts[1]))
                 except OSError as e:
                     self.unlock(lockfd, Verbose)
-                    raise ZEBUError("Transmission problem on " + self.name + \
-                                    ": " + str(e))
+                    raise ZEBUError(
+                        "Transmission problem on " + self.name + ": " + str(e)
+                    )
                 if retval == 0:
                     retval = sts[1]
             if cmd[1] != None:
                 if retval == 0:
                     try:
-                        fd = open(status_file, 'a')
-                        fd.write(cmd[1] + '\n')
+                        fd = open(status_file, "a")
+                        fd.write(cmd[1] + "\n")
                         fd.close()
                         if Verbose:
                             print("    transmitted " + cmd[1])
                     except OSError:
                         self.unlock(lockfd, Verbose)
-                        raise ZEBUError("Could not append to status file " + \
-                                        status_file)
+                        raise ZEBUError(
+                            "Could not append to status file " + status_file
+                        )
                 else:
                     self.unlock(lockfd, Verbose)
-                    raise ZEBUError("Transmission did not fully complete for " \
-                                    + self.name + \
-                                    " - vault may be inconsistent with " + \
-                                    "backup server.")
+                    raise ZEBUError(
+                        "Transmission did not fully complete for "
+                        + self.name
+                        + " - vault may be inconsistent with "
+                        + "backup server."
+                    )
 
         if self.recurse:
             # Drop the current list of child filesystems, for future reference
             try:
-                kids_fd = open(kids_file, 'w')
+                kids_fd = open(kids_file, "w")
                 try:
                     pickle.dump(self.filesystems, kids_fd)
                 except pickle.PickleError:
                     if Verbose:
-                        print("Couldn't write " + kids_file + \
-                              " due to a formatting error.  Ignoring it.")
+                        print(
+                            "Couldn't write "
+                            + kids_file
+                            + " due to a formatting error.  Ignoring it."
+                        )
                 kids_fd.close()
             except IOError:
                 if Verbose:
@@ -573,30 +639,40 @@ class ZEBUVault(ZFSfs):
         self.use_excludes = False
         self.recurse = False
 
-    excludes = property(fget=lambda self: 
-                        self.config.getOption(self.name, "excludes"),
-                    fset=None, fdel=None,
-                    doc="rsync excludes")
+    excludes = property(
+        fget=lambda self: self.config.getOption(self.name, "excludes"),
+        fset=None,
+        fdel=None,
+        doc="rsync excludes",
+    )
 
-    additional_excludes = property(fget=lambda self: 
-                        self.config.getOption(self.name, "additional_excludes"),
-                    fset=None, fdel=None,
-                    doc="more rsync excludes")
+    additional_excludes = property(
+        fget=lambda self: self.config.getOption(self.name, "additional_excludes"),
+        fset=None,
+        fdel=None,
+        doc="more rsync excludes",
+    )
 
-    rsync_path = property(fget=lambda self: 
-                        self.config.getOption(self.name, "rsync_path"),
-                    fset=None, fdel=None,
-                    doc="path to rsync binary")
+    rsync_path = property(
+        fget=lambda self: self.config.getOption(self.name, "rsync_path"),
+        fset=None,
+        fdel=None,
+        doc="path to rsync binary",
+    )
 
-    rsync_server = property(fget=lambda self: 
-                        self.config.getOption(self.name, "rsync_server"),
-                    fset=None, fdel=None,
-                    doc="remote server for rsync")
+    rsync_server = property(
+        fget=lambda self: self.config.getOption(self.name, "rsync_server"),
+        fset=None,
+        fdel=None,
+        doc="remote server for rsync",
+    )
 
-    basepath = property(fget=lambda self: 
-                        self.config.getOption(self.name, "basepath"),
-                    fset=None, fdel=None,
-                    doc="remote directory for rsync")
+    basepath = property(
+        fget=lambda self: self.config.getOption(self.name, "basepath"),
+        fset=None,
+        fdel=None,
+        doc="remote directory for rsync",
+    )
 
     def snapshot(self):
         """
@@ -614,18 +690,24 @@ class ZEBUVault(ZFSfs):
         self.verify()
 
         # rsync, using hardcoded options.
-        rsync_cmd = [self.rsync_path, "-vrltH", "--delete", "-pgo",
-                     "--stats", "-D", "--numeric-ids"]
+        rsync_cmd = [
+            self.rsync_path,
+            "-vrltH",
+            "--delete",
+            "-pgo",
+            "--stats",
+            "-D",
+            "--numeric-ids",
+        ]
         if self.use_excludes == True:
             rsync_cmd.append("--exclude-from=" + self.exclude_path)
-        rsync_cmd.append(self.rsync_server + ':' + self.basepath)
+        rsync_cmd.append(self.rsync_server + ":" + self.basepath)
         rsync_cmd.append(self.tree_path)
 
         try:
-            fd = open(self.rsync_log, 'w')
+            fd = open(self.rsync_log, "w")
         except OSError as e:
-            raise ZEBUError("Could not open rsync log (aborting): " + \
-                            self.rsync_log)
+            raise ZEBUError("Could not open rsync log (aborting): " + self.rsync_log)
 
         try:
             proc = Popen(rsync_cmd, stdin=None, stdout=fd, stderr=fd)
@@ -635,41 +717,37 @@ class ZEBUVault(ZFSfs):
 
         # return codes shamelessly stolen from dirvish
         retcodes = {
-            0 : [ 'success',     "No errors" ],
-            1 : [ 'fatal',       "syntax or usage error" ],
-            2 : [ 'fatal',       "protocol incompatibility" ],
-            3 : [ 'fatal',       "errors selecting input/output files, dirs" ],
-            4 : [ 'fatal',       "requested action not supported" ],
-            5 : [ 'fatal',       "error starting client-server protocol" ],
-
-            10 : [ 'error',       "error in socket IO" ],
-            11 : [ 'error',       "error in file IO" ],
-            12 : [ 'check',       "error in rsync protocol data stream" ],
-            13 : [ 'check',       "errors with program diagnostics" ],
-            14 : [ 'error',       "error in IPC code" ],
-
-            20 : [ 'error',       "status returned when sent SIGUSR1, SIGINT" ],
-            21 : [ 'error',       "some error returned by waitpid()" ],
-            22 : [ 'error',       "error allocating core memory buffers" ],
-            23 : [ 'warning',     "partial transfer" ],
-            24 : [ 'warning',     "file vanished on sender" ],
-
-            30 : [ 'error',       "timeout in data send/receive" ],
-
-            124 : [ 'fatal',       "remote shell failed" ],
-            125 : [ 'error',       "remote shell killed" ],
-            126 : [ 'fatal',       "command could not be run" ],
-            127 : [ 'fatal',       "command not found" ],
-            255 : [ 'fatal',       "rsync killed?" ]
+            0: ["success", "No errors"],
+            1: ["fatal", "syntax or usage error"],
+            2: ["fatal", "protocol incompatibility"],
+            3: ["fatal", "errors selecting input/output files, dirs"],
+            4: ["fatal", "requested action not supported"],
+            5: ["fatal", "error starting client-server protocol"],
+            10: ["error", "error in socket IO"],
+            11: ["error", "error in file IO"],
+            12: ["check", "error in rsync protocol data stream"],
+            13: ["check", "errors with program diagnostics"],
+            14: ["error", "error in IPC code"],
+            20: ["error", "status returned when sent SIGUSR1, SIGINT"],
+            21: ["error", "some error returned by waitpid()"],
+            22: ["error", "error allocating core memory buffers"],
+            23: ["warning", "partial transfer"],
+            24: ["warning", "file vanished on sender"],
+            30: ["error", "timeout in data send/receive"],
+            124: ["fatal", "remote shell failed"],
+            125: ["error", "remote shell killed"],
+            126: ["fatal", "command could not be run"],
+            127: ["fatal", "command not found"],
+            255: ["fatal", "rsync killed?"],
         }
 
         type = retcodes[ret][0]
         try:
-            if type == 'error' or type == 'fatal':
+            if type == "error" or type == "fatal":
                 self.logger.logError(retcodes[ret][1])
-            if type == 'check' or type == 'warning':
+            if type == "check" or type == "warning":
                 self.logger.logWarning(retcodes[ret][1])
-            if type == 'success':
+            if type == "success":
                 self.logger.logSuccess(retcodes[ret][1])
         except KeyError:
             self.logger.logWarning("Unknown rsync return code: " + str(ret))
@@ -678,7 +756,7 @@ class ZEBUVault(ZFSfs):
         self.logger.flush()
 
         # Checks and warnings can happen on a (mostly) successful backup
-        if type == 'success' or type == 'warning' or type == 'check':
+        if type == "success" or type == "warning" or type == "check":
             return True
         else:
             return False
@@ -701,48 +779,49 @@ class ZEBUVault(ZFSfs):
         except OSError as e:
             # create dir
             try:
-                os.mkdir(self.tree_path, 0O755)
+                os.mkdir(self.tree_path, 0o755)
                 self.logger.logWarning("Created tree directory.")
             except OSError:
-                raise ZEBUError("Tree could not be created for vault " + \
-                                self.name)
+                raise ZEBUError("Tree could not be created for vault " + self.name)
 
         # Build rsync exclusions
         if self.excludes != None:
             try:
-                ex = open(self.excludes, 'r')
+                ex = open(self.excludes, "r")
             except:
                 raise ZEBUError("Couldn't open excludes file: " + self.excludes)
             try:
-                myex = open(self.exclude_path, 'w')
+                myex = open(self.exclude_path, "w")
                 line = ex.readline()
-                while(line):
+                while line:
                     myex.write(line)
                     line = ex.readline()
                 myex.close()
                 ex.close()
                 self.use_excludes = True
             except:
-                raise ZEBUError("Can't create excludes file: " + \
-                                self.exclude_path)
+                raise ZEBUError("Can't create excludes file: " + self.exclude_path)
         if self.additional_excludes != None:
             try:
-                ex = open(self.additional_excludes, 'r')
+                ex = open(self.additional_excludes, "r")
             except:
-                raise ZEBUError("Couldn't open additional excludes file: " + \
-                                self.additional_excludes)
+                raise ZEBUError(
+                    "Couldn't open additional excludes file: "
+                    + self.additional_excludes
+                )
             try:
-                myex = open(self.exclude_path, 'a')
+                myex = open(self.exclude_path, "a")
                 line = ex.readline()
-                while(line):
+                while line:
                     myex.write(line)
                     line = ex.readline()
                 myex.close()
                 ex.close()
                 self.use_excludes = True
             except:
-                raise ZEBUError("Can't append additional excludes file: " + \
-                                self.exclude_path)
+                raise ZEBUError(
+                    "Can't append additional excludes file: " + self.exclude_path
+                )
 
         # If we aren't using an excludes file, we shouldn't have one.
         if self.use_excludes == False:
@@ -756,8 +835,11 @@ class ZEBUVault(ZFSfs):
                     os.unlink(self.exclude_path)
                     self.logger.logWarning("Removed obsolete exclude file.")
                 except:
-                    self.logger.logError("Could not remove obsolete exclude" + \
-                                         " file: " + self.exclude_path)
+                    self.logger.logError(
+                        "Could not remove obsolete exclude"
+                        + " file: "
+                        + self.exclude_path
+                    )
 
 
 def usage():
@@ -788,10 +870,21 @@ def main():
 
     # Collect command-line args
     try:
-        opts, otherargs = getopt.getopt( sys.argv[1:], "hf:iF:vsctV", \
-                            ["help","config=","init","filesystem=","verbose",\
-                             "no-snapshot","no-cleanup","no-transmit",\
-                             "version"] )
+        opts, otherargs = getopt.getopt(
+            sys.argv[1:],
+            "hf:iF:vsctV",
+            [
+                "help",
+                "config=",
+                "init",
+                "filesystem=",
+                "verbose",
+                "no-snapshot",
+                "no-cleanup",
+                "no-transmit",
+                "version",
+            ],
+        )
     except getopt.GetoptError:
         print("Invalid option found.")
         usage()
@@ -901,8 +994,7 @@ def main():
                         print("Completed transmit of vault: " + str(vault))
                 except ZEBUError as e:
                     print(str(e))
-                    print("Problem transmitting vault %s: %s" % (str(vault), \
-                                                                 str(e)))
+                    print("Problem transmitting vault %s: %s" % (str(vault), str(e)))
             elif Verbose:
                 print(str(vault) + ": skipping transmit")
 

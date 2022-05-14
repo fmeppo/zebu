@@ -1,4 +1,4 @@
-#!/usr/local/bin/python2
+#!/usr/local/bin/python3
 #
 # zebu is an zfs-based backup utility.  It syncs down a copy of a system to
 # a ZFS filesystem, then triggers a ZFS snapshot when done.
@@ -19,25 +19,25 @@ class ZEBUValueError(ZEBUError):
 
 class ZEBUErrorLogger:
     def __init__(self, logpath):
-	self.log = []
-	self.logpath = logpath
+        self.log = []
+        self.logpath = logpath
 
     def logSuccess(self, message):
-	tuple = (time.localtime(), "Success", message)
-	self.log.append(tuple)
+        tuple = (time.localtime(), "Success", message)
+        self.log.append(tuple)
 
     def logError(self, message):
-	tuple = (time.localtime(), "Error", message)
-	self.log.append(tuple)
+        tuple = (time.localtime(), "Error", message)
+        self.log.append(tuple)
 
     def logWarning(self, message):
-	tuple = (time.localtime(), "Warning", message)
-	self.log.append(tuple)
+        tuple = (time.localtime(), "Warning", message)
+        self.log.append(tuple)
 
     def flush(self):
-	if len(self.log) != 0:
-	    try:
-		fd = open(self.logpath, 'w')
+        if len(self.log) != 0:
+            try:
+                fd = open(self.logpath, 'w')
 		for tuple in self.log:
 		    fd.write(time.strftime("%d %b %Y %H:%M:%S ", tuple[0]) +
 			     tuple[1] + " " +
@@ -356,7 +356,7 @@ class ZFSfs:
 
         if self.lockfile != None and self.lockfile != "":
 	    if Verbose:
-		print "Acquiring lock file " + self.lockfile
+		print("Acquiring lock file " + self.lockfile)
             while True:
                 try:
                     lockfd = os.open(self.lockfile, os.O_CREAT | os.O_EXCL | \
@@ -369,7 +369,7 @@ class ZFSfs:
                 else:
                     break
 	    if Verbose:
-		print "Locked " + self.lockfile
+		print("Locked " + self.lockfile)
         else:
             lockfd = None
 
@@ -383,7 +383,7 @@ class ZFSfs:
             os.unlink(self.lockfile)
             os.close(lockfd)
 	    if Verbose:
-		print "Released " + self.lockfile
+		print("Released " + self.lockfile)
 
 
     def transmit(self, Verbose=False):
@@ -404,11 +404,11 @@ class ZFSfs:
             s = os.stat(status_file)
             mode = "incr"
             if Verbose:
-                print "  xmit (incremental): " + self.name
+                print("  xmit (incremental): " + self.name)
         except OSError:
             mode = "full"
             if Verbose:
-                print "  xmit (full): " + self.name
+                print("  xmit (full): " + self.name)
 
         if self.recurse:
             # Attempt to load the cached list of child filesystems, so we can
@@ -419,13 +419,13 @@ class ZFSfs:
                     kids = pickle.load(kids_fd)
                 except pickle.PickleError:
                     if Verbose:
-                        print "Couldn't load " + kids_file + \
-                              " due to a formatting error.  Ignoring it."
+                        print("Couldn't load " + kids_file + \
+                              " due to a formatting error.  Ignoring it.")
                     kids = None
                 kids_fd.close()
             except IOError:
                 if Verbose:
-                    print "Notice: Missing " + kids_file
+                    print("Notice: Missing " + kids_file)
                 kids = None
 
         if mode == "incr":
@@ -515,11 +515,11 @@ class ZFSfs:
                 try:
                     p = Popen(cmd[0] + "|" + self.transmit_cmd, shell=True)
                     if Verbose:
-                        print "    command: " + cmd[0] + " | " + \
-						self.transmit_cmd
+                        print("    command: " + cmd[0] + " | " + \
+						self.transmit_cmd)
                     sts = os.waitpid(p.pid, 0)
                     if Verbose:
-                        print "        return value: " + str(sts[1])
+                        print("        return value: " + str(sts[1]))
                 except OSError, e:
 		    self.unlock(lockfd, Verbose)
                     raise ZEBUError("Transmission problem on " + self.name + \
@@ -533,7 +533,7 @@ class ZFSfs:
                         fd.write(cmd[1] + '\n')
                         fd.close()
                         if Verbose:
-                            print "    transmitted " + cmd[1]
+                            print("    transmitted " + cmd[1])
                     except OSError:
 			self.unlock(lockfd, Verbose)
                         raise ZEBUError("Could not append to status file " + \
@@ -553,12 +553,12 @@ class ZFSfs:
                     pickle.dump(self.filesystems, kids_fd)
                 except pickle.PickleError:
                     if Verbose:
-                        print "Couldn't write " + kids_file + \
-                              " due to a formatting error.  Ignoring it."
+                        print("Couldn't write " + kids_file + \
+                              " due to a formatting error.  Ignoring it.")
                 kids_fd.close()
             except IOError:
                 if Verbose:
-                    print "Notice: Couldn't write " + kids_file
+                    print("Notice: Couldn't write " + kids_file)
 
 	self.unlock(lockfd, Verbose)
 
@@ -761,20 +761,19 @@ class ZEBUVault(ZFSfs):
 
 
 def usage():
-    print "zebu [options]"
-    print
-    print "-c, --no-cleanup	Skip the cleanup phase"
-    print "-f, --config <file>	Use config file at <file>"
-    print "-F, --filesystem <fs>	Only operate on the named filesystem"
-    print "-h, --help		Print a usage summary"
-    print "-s, --no-snapshot	Skip the snapshot phase"
-    print "-t, --no-transmit	Skip the transmit phase"
-    print "-v, --verbose		Be rather verbose"
-    print "-V, --version		Print version information"
+    print("zebu [options]\n")
+    print("-c, --no-cleanup	Skip the cleanup phase")
+    print("-f, --config <file>	Use config file at <file>")
+    print("-F, --filesystem <fs>	Only operate on the named filesystem")
+    print("-h, --help		Print a usage summary")
+    print("-s, --no-snapshot	Skip the snapshot phase")
+    print("-t, --no-transmit	Skip the transmit phase")
+    print("-v, --verbose		Be rather verbose")
+    print("-V, --version		Print version information")
 
 
 def version():
-    print "zebu version 1.2, copyight Mike Shuey (<shuey@fmepnet.org>), 2017"
+    print("zebu version 1.3, copyight Mike Shuey (<shuey@fmepnet.org>), 2021")
 
 
 def main():
@@ -794,7 +793,7 @@ def main():
 			     "no-snapshot","no-cleanup","no-transmit",\
 			     "version"] )
     except getopt.GetoptError:
-	print "Invalid option found."
+	print("Invalid option found.")
 	usage()
 	sys.exit(1)
 
@@ -825,11 +824,11 @@ def main():
     try:
 	config = ZEBUConfig(ConfigFile)
     except ZEBUError, e:
-	print e
+	print(e)
 	sys.exit(2)
 
     if Verbose:
-	print "Found config: " + str(config)
+	print("Found config: " + str(config))
 
     try:
         if SingleShotVault != None:
@@ -837,7 +836,7 @@ def main():
         else:
             vaults = config.getVaults()
     except ZEBUError, e:
-        print str(e)
+        print(str(e))
         sys.exit(3)
 
     #
@@ -845,72 +844,72 @@ def main():
     #
     if not DoSnapshot:
 	if Verbose:
-	    print "Skipping snapshot phase."
+	    print("Skipping snapshot phase.")
     else:
 	for vault in vaults:
 	    if Verbose:
-		print "Selecting source vault for snapshot: " + str(vault)
+		print("Selecting source vault for snapshot: " + str(vault))
 
             if vault.doSnapshot:
                 try:
                     vault.snapshot()
                     if Verbose:
-                        print "Completed snapshot of vault: " + str(vault)
+                        print("Completed snapshot of vault: " + str(vault))
                 except ZEBUError, e:
-                    print str(e)
-                    print "Problem snapshotting vault %s: %s" % (str(vault), str(e))
+                    print(str(e))
+                    print("Problem snapshotting vault %s: %s" % (str(vault), str(e)))
             elif Verbose:
-                print str(vault) + ": skipping snapshot"
+                print(str(vault) + ": skipping snapshot")
 
     #
     # Run cleanup phase
     #
     if not DoCleanup:
 	if Verbose:
-	    print "Skipping cleanup phase."
+	    print("Skipping cleanup phase.")
     else:
 	for vault in vaults:
 	    if Verbose:
-		print "Selecting vault for cleanup: " + str(vault)
+		print("Selecting vault for cleanup: " + str(vault))
 
             if vault.doCleanup:
                 try:
                     vault.cleanup()
                     if Verbose:
-                        print "Cleaned up vault: " + str(vault)
+                        print("Cleaned up vault: " + str(vault))
                 except ZEBUError, e:
-                    print str(e)
-                    print "Problem cleaning vault %s: %s" % (str(vault), str(e))
+                    print(str(e))
+                    print("Problem cleaning vault %s: %s" % (str(vault), str(e)))
             elif Verbose:
-                print str(vault) + ": skipping cleanup"
+                print(str(vault) + ": skipping cleanup")
 
     #
     # Run transmit phase
     #
     if not DoTransmit:
         if Verbose:
-            print "Skipping transmit phase"
+            print("Skipping transmit phase")
     else:
         for vault in vaults:
             if Verbose:
-                print "Selecting source vault for transmit: " + str(vault)
+                print("Selecting source vault for transmit: " + str(vault))
 
             if vault.doTransmit:
 		try:
 		    vault.transmit(Verbose)
                     if Verbose:
-                        print "Completed transmit of vault: " + str(vault)
+                        print("Completed transmit of vault: " + str(vault))
 		except ZEBUError, e:
-		    print str(e)
-                    print "Problem transmitting vault %s: %s" % (str(vault), \
-                                                                 str(e))
+		    print(str(e))
+                    print("Problem transmitting vault %s: %s" % (str(vault), \
+                                                                 str(e)))
 	    elif Verbose:
-		print str(vault) + ": skipping transmit"
+		print(str(vault) + ": skipping transmit")
 
 
 if __name__ == "__main__":
     try:
 	main()
     except KeyboardInterrupt:
-	print "Interrupt received, exiting."
+	print("Interrupt received, exiting.")
 	sys.exit(37)

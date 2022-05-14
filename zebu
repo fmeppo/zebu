@@ -164,7 +164,7 @@ class ZFSfs:
         try:
             po = Popen([self.zfs_path, 'list', '-o', prop, self.name],
                       stdout=PIPE,stderr=PIPE)
-        except OSError, e:
+        except OSError as e:
             raise ZEBUError("Cannot obtain ZFS properties for " + self.name)
 
         out = po.communicate()[0]
@@ -268,7 +268,7 @@ class ZFSfs:
                 ret = call([self.zfs_path, 'snapshot', '-r', snapname])
             else:
                 ret = call([self.zfs_path, 'snapshot', snapname])
-        except OSError, e:
+        except OSError as e:
             raise ZEBUError("Could not execute snapshot for " + self.name)
         if ret == 0:
             # If we made a snap, add it to the internal state (saving a re-scan)
@@ -286,7 +286,7 @@ class ZFSfs:
             po = Popen([self.zfs_path, 'list', '-o', 'name', '-H',
                         '-t', 'snapshot'],
                        stdout=PIPE,stderr=PIPE)
-        except OSError, e:
+        except OSError as e:
             raise ZEBUError("Cannot obtain ZFS snapshot list")
 
         out = po.communicate()[0].splitlines()
@@ -309,7 +309,7 @@ class ZFSfs:
             po = Popen([self.zfs_path, 'list', '-r', '-H', '-t', 'filesystem', \
                         self.name],
                        stdout=PIPE, stderr=PIPE)
-        except OSError, e:
+        except OSError as e:
             raise ZEBUError("Cannot obtain ZFS filesystem list")
 
         out = po.communicate()[0].splitlines()
@@ -339,7 +339,7 @@ class ZFSfs:
                         else:
                             po = Popen([self.zfs_path, 'destroy', snapname])
                         po.communicate()
-                    except OSError, e:
+                    except OSError as e:
                         raise ZEBUError("Cannot obtain ZFS snapshot list")
                     if po.returncode != 0:
                         raise ZEBUError("Error deleting snapshot " + snapname)
@@ -361,7 +361,7 @@ class ZFSfs:
                 try:
                     lockfd = os.open(self.lockfile, os.O_CREAT | os.O_EXCL | \
                                                     os.O_RDWR)
-                except OSError, e:
+                except OSError as e:
                     if e.errno != errno.EEXIST:
                         raise ZEBUError("Unable to write lockfile " + \
                                         self.lockfile)
@@ -520,7 +520,7 @@ class ZFSfs:
                     sts = os.waitpid(p.pid, 0)
                     if Verbose:
                         print("        return value: " + str(sts[1]))
-                except OSError, e:
+                except OSError as e:
                     self.unlock(lockfd, Verbose)
                     raise ZEBUError("Transmission problem on " + self.name + \
                                     ": " + str(e))
@@ -623,14 +623,14 @@ class ZEBUVault(ZFSfs):
 
         try:
             fd = open(self.rsync_log, 'w')
-        except OSError, e:
+        except OSError as e:
             raise ZEBUError("Could not open rsync log (aborting): " + \
                             self.rsync_log)
 
         try:
             proc = Popen(rsync_cmd, stdin=None, stdout=fd, stderr=fd)
             ret = proc.wait()
-        except OSError, e:
+        except OSError as e:
             raise ZEBUError("rsync failed, aborting backup " + self.name)
 
         # return codes shamelessly stolen from dirvish
@@ -690,7 +690,7 @@ class ZEBUVault(ZFSfs):
         # check repopath ISDIR
         try:
             m = os.stat(self.path)[ST_MODE]
-        except OSError, e:
+        except OSError as e:
             raise ZEBUError("Repository not found: " + self.path)
         if not S_ISDIR(m):
             raise ZEBUError("Repository path not a directory: " + self.path)
@@ -698,10 +698,10 @@ class ZEBUVault(ZFSfs):
         # check tree ISDIR (create, warn)
         try:
             m = os.stat(self.tree_path)[ST_MODE]
-        except OSError, e:
+        except OSError as e:
             # create dir
             try:
-                os.mkdir(self.tree_path, 0755)
+                os.mkdir(self.tree_path, 0O755)
                 self.logger.logWarning("Created tree directory.")
             except OSError:
                 raise ZEBUError("Tree could not be created for vault " + \
@@ -823,7 +823,7 @@ def main():
     # Load the configuration
     try:
         config = ZEBUConfig(ConfigFile)
-    except ZEBUError, e:
+    except ZEBUError as e:
         print(e)
         sys.exit(2)
 
@@ -835,7 +835,7 @@ def main():
             vaults = [config.getVault(SingleShotVault)]
         else:
             vaults = config.getVaults()
-    except ZEBUError, e:
+    except ZEBUError as e:
         print(str(e))
         sys.exit(3)
 
@@ -855,7 +855,7 @@ def main():
                     vault.snapshot()
                     if Verbose:
                         print("Completed snapshot of vault: " + str(vault))
-                except ZEBUError, e:
+                except ZEBUError as e:
                     print(str(e))
                     print("Problem snapshotting vault %s: %s" % (str(vault), str(e)))
             elif Verbose:
@@ -877,7 +877,7 @@ def main():
                     vault.cleanup()
                     if Verbose:
                         print("Cleaned up vault: " + str(vault))
-                except ZEBUError, e:
+                except ZEBUError as e:
                     print(str(e))
                     print("Problem cleaning vault %s: %s" % (str(vault), str(e)))
             elif Verbose:
@@ -899,7 +899,7 @@ def main():
                     vault.transmit(Verbose)
                     if Verbose:
                         print("Completed transmit of vault: " + str(vault))
-                except ZEBUError, e:
+                except ZEBUError as e:
                     print(str(e))
                     print("Problem transmitting vault %s: %s" % (str(vault), \
                                                                  str(e)))

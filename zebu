@@ -38,25 +38,25 @@ class ZEBUErrorLogger:
         if len(self.log) != 0:
             try:
                 fd = open(self.logpath, 'w')
-		for tuple in self.log:
-		    fd.write(time.strftime("%d %b %Y %H:%M:%S ", tuple[0]) +
-			     tuple[1] + " " +
-			     tuple[2])
-		fd.close()
-	    except:
-		raise ZEBUError("Could not write log to " + self.logpath)
-	else:
-	    m = None
-	    try:
-		m = os.stat(self.logpath)[ST_MODE]
-	    except OSError:
-		pass
-	    if m != None:
-		try:
-		    os.unlink(self.logpath)
-		except:
-		    raise ZEBUError("Could not remove obsolete log file: " + \
-				    self.logpath)
+                for tuple in self.log:
+                    fd.write(time.strftime("%d %b %Y %H:%M:%S ", tuple[0]) +
+                             tuple[1] + " " +
+                             tuple[2])
+                fd.close()
+            except:
+                raise ZEBUError("Could not write log to " + self.logpath)
+        else:
+            m = None
+            try:
+                m = os.stat(self.logpath)[ST_MODE]
+            except OSError:
+                pass
+            if m != None:
+                try:
+                    os.unlink(self.logpath)
+                except:
+                    raise ZEBUError("Could not remove obsolete log file: " + \
+                                    self.logpath)
 
 
 class ZEBUConfig:

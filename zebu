@@ -81,8 +81,8 @@ class ZEBUConfig:
 
         # hardcoded defaults
         self.defaults = {
-            "excludes": None,
-            "additional_excludes": None,
+            #"excludes": None,
+            #"additional_excludes": None,
             "rsync_path": "rsync",
             "zfs_path": "/sbin/zfs",
             "recurse": "no",
@@ -90,10 +90,10 @@ class ZEBUConfig:
             "doSnapshot": "True",
             "doCleanup": "True",
             "doTransmit": "False",
-            "lockfile": None,
+            #"lockfile": None,
         }
 
-        self.config = configparser.SafeConfigParser(self.defaults)
+        self.config = configparser.ConfigParser(self.defaults)
         try:
             list = self.config.read([file])
         except:

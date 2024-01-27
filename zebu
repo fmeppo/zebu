@@ -349,7 +349,7 @@ class ZFSfs:
         if po.returncode != 0:
             raise ZEBUError("Problem obtaining ZFS filesystem list")
         for line in out:
-            self.__filesystems__.append(str(line).split("\t")[0])
+            self.__filesystems__.append(str(line.split(b'\t')[0]))
 
         return self.__filesystems__
 

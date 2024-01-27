@@ -177,7 +177,7 @@ class ZFSfs:
         if po.returncode != 0:
             raise ZEBUError("Problem obtaining ZFS properties for " + self.name)
 
-        return str(out.splitlines()[1])
+        return str(out.splitlines()[1], "utf-8")
 
     def __getRecursion__(self):
         return self.config.getBoolOption(self.name, "recurse")
@@ -325,8 +325,8 @@ class ZFSfs:
             raise ZEBUError("Problem obtaining ZFS snapshot list")
         prefix = self.name + "@" + self.snap_prefix
         for line in out:
-            if str(line).startswith(prefix):
-                self.snapshots.append(str(line).split(prefix)[1])
+            if str(line, "utf-8").startswith(prefix):
+                self.snapshots.append(str(line, "utf-8").split(prefix)[1])
 
     def __buildFilesystems__(self):
         """

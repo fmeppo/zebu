@@ -443,7 +443,7 @@ class ZFSfs:
             # Attempt to load the cached list of child filesystems, so we can
             # tell if a new one has been created.
             try:
-                kids_fd = open(kids_file, "r")
+                kids_fd = open(kids_file, "rb")
                 try:
                     kids = pickle.load(kids_fd)
                 except pickle.PickleError:
@@ -611,7 +611,7 @@ class ZFSfs:
         if self.recurse:
             # Drop the current list of child filesystems, for future reference
             try:
-                kids_fd = open(kids_file, "w")
+                kids_fd = open(kids_file, "wb")
                 try:
                     pickle.dump(self.filesystems, kids_fd)
                 except pickle.PickleError:

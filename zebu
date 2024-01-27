@@ -177,7 +177,7 @@ class ZFSfs:
         if po.returncode != 0:
             raise ZEBUError("Problem obtaining ZFS properties for " + self.name)
 
-        return out.splitlines()[1]
+        return str(out.splitlines()[1])
 
     def __getRecursion__(self):
         return self.config.getBoolOption(self.name, "recurse")
@@ -632,10 +632,10 @@ class ZFSfs:
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):
         ZFSfs.__init__(self, name, config)
-        self.tree_path = str(self.path) + "/tree"
-        self.rsync_log = str(self.path) + "/rsync_log"
-        self.exclude_path = str(self.path) + "/excludes"
-        self.logger = ZEBUErrorLogger(str(self.path) + "/zebu_log")
+        self.tree_path = self.path + "/tree"
+        self.rsync_log = self.path + "/rsync_log"
+        self.exclude_path = self.path + "/excludes"
+        self.logger = ZEBUErrorLogger(self.path + "/zebu_log")
         self.use_excludes = False
 
     excludes = property(

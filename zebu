@@ -325,8 +325,8 @@ class ZFSfs:
             raise ZEBUError("Problem obtaining ZFS snapshot list")
         prefix = self.name + "@" + self.snap_prefix
         for line in out:
-            if line.startswith(prefix):
-                self.snapshots.append(line.split(prefix)[1])
+            if str(line).startswith(prefix):
+                self.snapshots.append(str(line).split(prefix)[1])
 
     def __buildFilesystems__(self):
         """
@@ -632,12 +632,11 @@ class ZFSfs:
 class ZEBUVault(ZFSfs):
     def __init__(self, name, config):
         ZFSfs.__init__(self, name, config)
-        self.tree_path = self.path + "/tree"
-        self.rsync_log = self.path + "/rsync_log"
-        self.exclude_path = self.path + "/excludes"
-        self.logger = ZEBUErrorLogger(self.path + "/zebu_log")
+        self.tree_path = str(self.path) + "/tree"
+        self.rsync_log = str(self.path) + "/rsync_log"
+        self.exclude_path = str(self.path) + "/excludes"
+        self.logger = ZEBUErrorLogger(str(self.path) + "/zebu_log")
         self.use_excludes = False
-        self.recurse = False
 
     excludes = property(
         fget=lambda self: self.config.getOption(self.name, "excludes"),

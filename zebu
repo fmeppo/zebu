@@ -859,7 +859,7 @@ def usage():
 
 
 def version():
-    print("zebu version 1.3.1, copyight Mike Shuey (<shuey@fmepnet.org>), 2024")
+    print("zebu version 1.3.2, copyight Mike Shuey (<shuey@fmepnet.org>), 2024")
 
 
 def main():

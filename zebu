@@ -81,8 +81,8 @@ class ZEBUConfig:
 
         # hardcoded defaults
         self.defaults = {
-            #"excludes": None,
-            #"additional_excludes": None,
+            # "excludes": None,
+            # "additional_excludes": None,
             "rsync_path": "rsync",
             "zfs_path": "/sbin/zfs",
             "recurse": "no",
@@ -90,7 +90,7 @@ class ZEBUConfig:
             "doSnapshot": "True",
             "doCleanup": "True",
             "doTransmit": "False",
-            #"lockfile": None,
+            # "lockfile": None,
         }
 
         self.config = configparser.ConfigParser(self.defaults)
@@ -349,7 +349,7 @@ class ZFSfs:
         if po.returncode != 0:
             raise ZEBUError("Problem obtaining ZFS filesystem list")
         for line in out:
-            self.__filesystems__.append(str(line.split(b'\t')[0], "utf-8"))
+            self.__filesystems__.append(str(line.split(b"\t")[0], "utf-8"))
 
         return self.__filesystems__
 

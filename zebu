@@ -110,11 +110,14 @@ class ZEBUConfig:
     # Allow vault-specific options to override defaults, and declared defaults
     # to override hard-coded defaults.  All this happens automatically in the
     # stock configparser module.
-    def getOption(self, vault, option):
+    def getOption(self, vault, option, required=True):
         if self.config.has_option(vault, option):
             return self.config.get(vault, option)
         else:
-            raise ZEBUValueError('Required option "' + option + '" not set.')
+            if required:
+                raise ZEBUValueError('Required option "' + option + '" not set.')
+            else:
+                return None
 
     # Get a boolean option, and return a python True or False.
     # Invalid values in the config file will raise an error.
@@ -646,7 +649,9 @@ class ZEBUVault(ZFSfs):
     )
 
     additional_excludes = property(
-        fget=lambda self: self.config.getOption(self.name, "additional_excludes"),
+        fget=lambda self: self.config.getOption(
+            self.name, "additional_excludes", False
+        ),
         fset=None,
         fdel=None,
         doc="more rsync excludes",
